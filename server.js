@@ -14,6 +14,14 @@ const io = require('socket.io')(server, {
 
 app.use(cors());
 
+if (process.env.NODE_ENV === 'production') {
+	app.use(express.static('client/build'));
+}
+
+app.get('*', (request, response) => {
+	response.sendFile(path.join(__dirname, 'client/build', 'index.html'));
+});
+
 io.on('connection', socket => {
 	const id = socket.handshake.query.id
 

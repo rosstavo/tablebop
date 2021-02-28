@@ -1,6 +1,8 @@
 import React, { useContext, useEffect, useState } from 'react'
 import io from 'socket.io-client'
 
+const PORT = process.env.PORT || 4000;
+
 const SocketContext = React.createContext()
 
 export function useSocket() {
@@ -12,7 +14,7 @@ export function SocketProvider({ id, children }) {
 
   useEffect(() => {
     const newSocket = io(
-      'http://localhost:4000',
+      `http://localhost:${PORT}`,
       { query: { id } }
     )
     setSocket(newSocket)

@@ -15,6 +15,8 @@ const io = require('socket.io')(server, {
 
 app.use(cors());
 
+let roomData = {};
+
 if (process.env.NODE_ENV === 'production') {
 	app.use(express.static('client/build'));
 }
@@ -28,7 +30,16 @@ io.on('connection', socket => {
 
 	socket.join(id);
 
+	if (roomData[id]) {
+		socket.local.emit('user-joined', roomData[id]);
+
+		console.log(roomData[id]);
+	}
+
 	socket.on('change-media', ({ media }) => {
+
+		roomData[id] = media;
+
 		socket.broadcast.to(id).emit('update-media', media);
 	});
 });

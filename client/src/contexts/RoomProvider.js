@@ -32,6 +32,10 @@ export function RoomProvider({ id, children }) {
      */
     const launchHandler = useCallback( async (media) => {
 
+        if (!media) {
+            return;
+        }
+
         if (!player.current) {
             setMedia(media);
             return;
@@ -76,6 +80,8 @@ export function RoomProvider({ id, children }) {
         if (socket == null) return;
 
         socket.on('update-media', launchHandler);
+
+        socket.on('user-joined', launchHandler);
 
         return () => socket.off('receive-message')
     }, [socket, launchHandler, id]);

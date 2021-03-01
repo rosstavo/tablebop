@@ -22,7 +22,7 @@ import {
 } from 'baseui';
 
 const primitives = {
-    primaryFontFamily: 'Rubik, sans-serif',
+    primaryFontFamily: 'Recursive, sans-serif',
 };
 const theme = createDarkTheme(primitives);
 

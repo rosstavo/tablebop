@@ -99,7 +99,15 @@ export default function App() {
                                     maxWidth: '30em',
                                     textAlign: 'center'
                                 })}>
-                                    <H1>Tablebop</H1>
+                                    <img
+                                        src="/tablebop-logo.svg"
+                                        alt="Tablebop"
+                                        className={css({
+                                            maxWidth: '20em',
+                                            margin: '0 auto'
+                                        })}
+                                    />
+
                                     <Paragraph1>A simple way of live-sharing YouTube videos and playlists with your friends, for tabletop roleplaying games</Paragraph1>
                                     <Block className={css({
                                         marginBottom: '1em'

@@ -205,11 +205,16 @@ export default function Media(props) {
                 padding: '2em'
             })}
             >
-                <H3 className={css({
-                    margin: '0'
-                })}>
-                    Tablebop
-                </H3>
+                <img
+                    src="/tablebop-logo.svg"
+                    alt="Tablebop"
+                    className={css({
+                        maxWidth: '16em',
+                        margin: '0 auto',
+                        display: 'block'
+                    })}
+                />
+
             </Block>
             <Block className={css({
                 padding: '0 2em',

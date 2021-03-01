@@ -24,17 +24,16 @@ app.get('*', (request, response) => {
 });
 
 io.on('connection', socket => {
-	const id = socket.handshake.query.id
+	const id = socket.handshake.query.id;
 
-	// console.log(id);
-	socket.join(id)
+	socket.join(id);
 
 	socket.on('change-media', ({ media }) => {
-		socket.broadcast.to(id).emit('update-media', media)
-	})
-})
+		socket.broadcast.to(id).emit('update-media', media);
+	});
+});
 
 
 server.listen(PORT, function () {
-	console.log('listening on port 4000')
-})
+	console.log('listening on port 4000');
+});

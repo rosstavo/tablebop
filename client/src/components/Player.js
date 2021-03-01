@@ -14,6 +14,7 @@ import YouTube from 'react-youtube';
 
 import { RoomStateContext } from './Room.js';
 import { useRoom } from '../contexts/RoomProvider.js';
+import { AppStateContext } from './App.js';
 
 import { extractYoutubeMeta } from './../Helpers.js';
 import { ArrowLeft } from 'baseui/icon';
@@ -23,35 +24,41 @@ export default function Player(props) {
 
     const { media } = useRoom();
 
+    const appState = useContext(AppStateContext);
+    const { isAdmin } = appState;
+
     const {
         player
     } = useRoom();
 
-    console.log(media);
-
-    const youtubeMeta = media.media ? extractYoutubeMeta(media.media) : {
-        id: 'TcqP_hSMU3I',
-        playlist: false
-    };
+    const youtubeMeta = media 
+        ? extractYoutubeMeta(media.media)
+        : {
+            id: 'TcqP_hSMU3I',
+            playlist: false
+        };
 
     // console.log(youtubeMeta);
-
     
-    let opts = {
-        height: '100%',
-        width: '100%',
-        playerVars: {
-            // https://developers.google.com/youtube/player_parameters
-            autoplay: true,
-            loop: media.loop,
-            modestbranding: true,
-            start: 0,
-            rel: 0,
-            listType: media.playlist ? 'playlist' : '',
-            list: media.playlist ? youtubeMeta.id : '',
-            playlist: (media.playlist || ! media.loop) ? '' : youtubeMeta.id
+    
+
+    let opts = media
+        ? {
+            height: '100%',
+            width: '100%',
+            playerVars: {
+                // https://developers.google.com/youtube/player_parameters
+                autoplay: true,
+                loop: media.loop,
+                modestbranding: true,
+                start: 0,
+                rel: 0,
+                listType: media.playlist ? 'playlist' : '',
+                list: media.playlist ? youtubeMeta.id : '',
+                playlist: (media.playlist || ! media.loop) ? '' : youtubeMeta.id
+            }
         }
-    };
+        : {};
 
     return (
         <>
@@ -69,7 +76,7 @@ export default function Player(props) {
                     </AspectRatioBoxBody>
                 </AspectRatioBox>
 
-                : <H4>Nothing playing right now.</H4>
+                : <H4>{isAdmin ? 'Nothing playing right now.' : 'No media launched since you joined.'}</H4>
             }
             <Button
                 $as="a"

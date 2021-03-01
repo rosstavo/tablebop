@@ -35,29 +35,6 @@ import { AppStateContext, AppDispatchContext } from './App.js';
  */
 // const socket = io.connect('http://localhost:4000');
 
-const itemProps = {
-    height: '100vh',
-    display: 'flex',
-    justifyContent: 'space-between',
-    flexDirection: 'column',
-    overflow: 'scroll',
-};
-
-const wideItemProps = {
-    ...itemProps,
-    overrides: {
-        Block: {
-            style: ({ $theme }) => ({
-                justifyContent: 'center',
-                alignItems: 'center',
-                width: "75%",
-                backgroundColor: $theme.colors.backgroundPrimary,
-                padding: '3em',
-            }),
-        },
-    },
-};
-
 
 export default function Room() {
 

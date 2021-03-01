@@ -21,13 +21,7 @@ export function useRoom() {
 
 export function RoomProvider({ id, children }) {
 
-    const [media, setMedia] = useState({
-        id: uuidv4(),
-        label: 'Intrigue',
-        media: 'https://www.youtube.com/watch?v=yEYxnJB4jZs',
-        playlist: false,
-        loop: true,
-    });
+    const [media, setMedia] = useState('');
 
     const socket = useSocket();
 
@@ -37,6 +31,11 @@ export function RoomProvider({ id, children }) {
      * Handle launch
      */
     const launchHandler = useCallback( async (media) => {
+
+        if (!player.current) {
+            setMedia(media);
+            return;
+        }
 
         const iframe = player.current.getInternalPlayer();
 

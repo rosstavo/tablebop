@@ -14,12 +14,24 @@ import {
     BaseProvider
 } from 'baseui';
 
+/**
+ * Theming
+ */
+import {
+    createDarkTheme
+} from 'baseui';
+
+const primitives = {
+    primaryFontFamily: 'Rubik, sans-serif',
+};
+const theme = createDarkTheme(primitives);
+
 const engine = new Styletron();
 
 ReactDOM.render(
     <React.StrictMode>
         <StyletronProvider value={engine}>
-            <BaseProvider theme={DarkTheme} >
+            <BaseProvider theme={theme} >
                 <App />
             </BaseProvider>
         </StyletronProvider>

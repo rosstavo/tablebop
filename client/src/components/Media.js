@@ -3,6 +3,7 @@ import React from 'react';
 /**
  * Base Web
  */
+import { useStyletron } from 'baseui';
 import { List, arrayMove } from 'baseui/dnd-list';
 import { H3, H4, Label1, Paragraph1, } from 'baseui/typography';
 import { Block } from 'baseui/block';
@@ -11,7 +12,6 @@ import { StyledLink } from "baseui/link";
 import { TriangleRight, Overflow, Plus } from 'baseui/icon';
 import { StyledSpinnerNext } from 'baseui/spinner';
 import { Tag, VARIANT, KIND } from "baseui/tag";
-import { useStyletron } from 'baseui';
 import { Drawer, ANCHOR } from 'baseui/drawer';
 import { FormControl } from 'baseui/form-control';
 import { Input } from 'baseui/input';
@@ -51,6 +51,8 @@ function uiReducer(draft, action) {
 
             // Set the newState to state
             draft.mediaList = newState;
+
+            localStorage.setItem('tablebop-media', JSON.stringify(newState));
 
             return;
         }
@@ -112,6 +114,8 @@ function uiReducer(draft, action) {
                 });
             }
 
+            localStorage.setItem('tablebop-media', JSON.stringify(draft.mediaList));
+
             draft.fields.media = '';
             draft.fields.label = '';
             draft.fields.loop = true;
@@ -166,7 +170,7 @@ const mediaList = [
  * Initial state of UI component
  */
 const initialState = {
-    mediaList: mediaList,   // An array of of media objects available for launch
+    mediaList: localStorage.getItem('tablebop-media') ? JSON.parse(localStorage.getItem('tablebop-media')) : mediaList, // An array of of media objects available for launch
     isDrawerOpen: false,    // Is the drawer open for editing
     isEditing: false,       // Is the media object in the drawer new or existing
     isTransitioning: false, // Is the old media fading out, ready to launch new media

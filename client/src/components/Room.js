@@ -3,6 +3,7 @@ import React, { useContext, useRef, useEffect } from 'react';
 /**
  * Base Web
  */
+import { useStyletron } from 'baseui';
 import { FlexGrid, FlexGridItem } from 'baseui/flex-grid';
 
 /**
@@ -37,7 +38,8 @@ const itemProps = {
     height: '100vh',
     display: 'flex',
     justifyContent: 'space-between',
-    flexDirection: 'column'
+    flexDirection: 'column',
+    overflow: 'scroll'
 };
 
 const wideItemProps = {
@@ -65,6 +67,8 @@ export default function Room() {
 
     const { isAdmin } = appState;
 
+    const [css, theme] = useStyletron();
+
     useEffect(() => {
         appDispatch({
             type: 'setRoom',
@@ -88,8 +92,10 @@ export default function Room() {
             <SocketProvider id={room}>
                 <RoomProvider id={room}>
                     <FlexGrid
+                        className={css({
+                            height: '100vh'
+                        })}
                         flexGridColumnCount={isAdmin ? 3 : 1}
-                        height="100vh"
                     >
 
                         {

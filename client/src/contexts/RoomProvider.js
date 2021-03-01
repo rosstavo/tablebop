@@ -79,7 +79,7 @@ export function RoomProvider({ id, children }) {
         socket.on('update-media', launchHandler);
 
         return () => socket.off('receive-message')
-    }, [socket, launchHandler]);
+    }, [socket, launchHandler, id]);
 
     /**
      * Update Media 

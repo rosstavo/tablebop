@@ -26,7 +26,7 @@ app.get('*', (request, response) => {
 io.on('connection', socket => {
 	const id = socket.handshake.query.id
 
-	console.log(id);
+	// console.log(id);
 	socket.join(id)
 
 	socket.on('change-media', ({ media }) => {

@@ -4,6 +4,7 @@ import React, { useContext, useRef, useEffect } from 'react';
  * Base Web
  */
 import { useStyletron } from 'baseui';
+import { Block } from 'baseui/block';
 import { FlexGrid, FlexGridItem } from 'baseui/flex-grid';
 
 /**
@@ -39,7 +40,7 @@ const itemProps = {
     display: 'flex',
     justifyContent: 'space-between',
     flexDirection: 'column',
-    overflow: 'scroll'
+    overflow: 'scroll',
 };
 
 const wideItemProps = {
@@ -49,8 +50,9 @@ const wideItemProps = {
             style: ({ $theme }) => ({
                 justifyContent: 'center',
                 alignItems: 'center',
-                width: `calc((200% - ${$theme.sizing.scale800}) / 3)`,
-                backgroundColor: $theme.colors.backgroundPrimary
+                width: "75%",
+                backgroundColor: $theme.colors.backgroundPrimary,
+                padding: '3em',
             }),
         },
     },
@@ -91,28 +93,46 @@ export default function Room() {
             { validateUuid(room) ? '' : <Redirect to="/" />}
             <SocketProvider id={room}>
                 <RoomProvider id={room}>
-                    <FlexGrid
+                    <Block
+                        flexWrap={[true, true, false]}
                         className={css({
-                            height: '100vh'
+                            height: '100vh',
+                            display: 'flex'
                         })}
-                        flexGridColumnCount={isAdmin ? 3 : 1}
                     >
 
                         {
                             isAdmin
                                 ? <>
-                                    <FlexGridItem {...itemProps}>
+                                    <Block 
+                                    width={['100%','100%', '50%', '33.3%']}
+                                    className={css({
+                                        height: '100vh',
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        flexDirection: 'column',
+                                        overflow: 'scroll',
+                                    })}>
                                         <Media room={room} />
-                                    </FlexGridItem>
-                                    <FlexGridItem {...itemProps} display="none">Item</FlexGridItem>
+                                    </Block>
                                 </>
                                 : ''
                         }
                         
-                        <FlexGridItem {...wideItemProps} padding="3em">
+                        <Block
+                        width={isAdmin ? ['100%','100%', '50%', '66.7%'] : '100%'}
+                        className={css({
+                            display: 'flex',
+                            height: '100vh',
+                            flexDirection: 'column',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            backgroundColor: theme.colors.backgroundPrimary,
+                            padding: '3em',
+                        })}>
                             <Player room={room} />
-                        </FlexGridItem>
-                    </FlexGrid>
+                        </Block>
+                    </Block>
                 </RoomProvider>
             </SocketProvider>
         </>

@@ -7,6 +7,7 @@ import { useStyletron } from 'baseui';
 import { List, arrayMove } from 'baseui/dnd-list';
 import { H3, H4, Label1, Paragraph1, } from 'baseui/typography';
 import { Block } from 'baseui/block';
+import { ButtonGroup } from "baseui/button-group";
 import { Button, SHAPE } from "baseui/button";
 import { StyledLink } from "baseui/link";
 import { TriangleRight, Overflow, Plus } from 'baseui/icon';
@@ -23,6 +24,10 @@ import { Checkbox, STYLE_TYPE, LABEL_PLACEMENT } from "baseui/checkbox";
  */
 import { v4 as uuidv4 } from 'uuid';
 import { useImmerReducer } from 'use-immer';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEdit, faVolumeUp, faPlay, faFileImport, faFileExport } from '@fortawesome/free-solid-svg-icons'
+import { faYoutube } from '@fortawesome/free-brands-svg-icons';
+
 
 /**
  * Contexts
@@ -227,14 +232,19 @@ export default function Media(props) {
                     items={mediaList.map((mediaItem, index) => (
                         <>
                             <Label1>
-                                {mediaItem.label + ' '}
+                                {mediaItem.label}
                                 <StyledLink
+                                    className={css({
+                                        display: 'inline-block',
+                                        marginLeft: '0.5em',
+                                        cursor: 'pointer'
+                                    })}
                                     onClick={(el) => uiDispatch({
                                         type: 'editMedia',
                                         payload: mediaList[index]
                                     })}
                                 >
-                                    Edit
+                                    <FontAwesomeIcon icon={faEdit} />
                                 </StyledLink>
                             </Label1>
                             <Paragraph1 margin="0">
@@ -279,8 +289,8 @@ export default function Media(props) {
                                             (isTransitioning === mediaList[el.$index].id)
                                                 ? <StyledSpinnerNext />
                                                 : (media.id === mediaList[el.$index].id)
-                                                    ? <Overflow size={32} />
-                                                    : <TriangleRight size={32} />
+                                                    ? <FontAwesomeIcon icon={faVolumeUp} size={32} />
+                                                    : <FontAwesomeIcon icon={faPlay} size={32} />
                                         }
                                     </Button>
                                 </div>
@@ -293,7 +303,11 @@ export default function Media(props) {
             <Block className={css({
                 padding: '0 2em'
             })} >
-                <Button onClick={() => uiDispatch({ type: 'addMedia' })} startEnhancer={Plus}>Add Media</Button>
+                <ButtonGroup>
+                    <Button onClick={() => uiDispatch({ type: 'addMedia' })} startEnhancer={() => <FontAwesomeIcon icon={faYoutube}/>}>Add Media</Button>
+                    <Button onClick={() => alert("Doesn't work yet")} startEnhancer={() => <FontAwesomeIcon icon={faFileImport}/>} disabled>Import</Button>
+                    <Button onClick={() => alert("Doesn't work yet")} startEnhancer={() => <FontAwesomeIcon icon={faFileExport}/>} disabled>Export</Button>
+                </ButtonGroup>
             </Block>
 
             <Block className={css({

@@ -7,12 +7,16 @@ import {
     AspectRatioBox,
     AspectRatioBoxBody,
 } from 'baseui/aspect-ratio-box';
+import { StyledLink } from "baseui/link";
+import { Button, KIND, SIZE } from "baseui/button";
 import YouTube from 'react-youtube';
+
 
 import { RoomStateContext } from './Room.js';
 import { useRoom } from '../contexts/RoomProvider.js';
 
 import { extractYoutubeMeta } from './../Helpers.js';
+import { ArrowLeft } from 'baseui/icon';
 
 
 export default function Player(props) {
@@ -41,6 +45,7 @@ export default function Player(props) {
             autoplay: true,
             loop: media.loop,
             modestbranding: true,
+            start: 0,
             rel: 0,
             listType: media.playlist ? 'playlist' : '',
             list: media.playlist ? youtubeMeta.id : '',
@@ -52,7 +57,7 @@ export default function Player(props) {
         <>
             {
                 media
-                ? <AspectRatioBox aspectRatio={16 / 9} width="100%">
+                ? <AspectRatioBox aspectRatio={16 / 9} width="100%" marginBottom="1em">
                     <AspectRatioBoxBody as={() => (
                         <YouTube
                             ref={player}
@@ -66,6 +71,15 @@ export default function Player(props) {
 
                 : <H4>Nothing playing right now.</H4>
             }
+            <Button
+                $as="a"
+                href="/"
+                kind={KIND.tertiary}
+                size={SIZE.compact}
+                startEnhancer={() => <ArrowLeft size="24px" />}
+            >
+                Leave Room
+            </Button>
         </>
     )
 }

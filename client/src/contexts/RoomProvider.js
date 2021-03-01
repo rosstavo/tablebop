@@ -23,10 +23,10 @@ export function RoomProvider({ id, children }) {
 
     const [media, setMedia] = useState({
         id: uuidv4(),
-        label: 'Music | Lobby',
-        media: 'https://youtu.be/a7C3ij1Me5c',
+        label: 'Intrigue',
+        media: 'https://www.youtube.com/watch?v=yEYxnJB4jZs',
         playlist: false,
-        loop: false
+        loop: true,
     });
 
     const socket = useSocket();

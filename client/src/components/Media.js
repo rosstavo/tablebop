@@ -141,25 +141,24 @@ function uiReducer(draft, action) {
 const mediaList = [
     {
         id: uuidv4(),
-        label: 'Music | Combat',
-        media: 'https://www.youtube.com/playlist?list=PLfdtiltiRHWGKUvioJly40RJZchSG2-34',
-        playlist: true,
+        label: 'Combat',
+        media: 'https://www.youtube.com/watch?v=w0sUw735gRw',
+        playlist: false,
         loop: true,
-        volume: 80
     },
     {
         id: uuidv4(),
-        label: 'Hallvard\'s Story',
-        media: 'https://www.youtube.com/watch?v=ppIfUX9St1I&ab_channel=RossHardy',
+        label: 'Adventure',
+        media: 'https://www.youtube.com/watch?v=A8qMyBWZNw0',
         playlist: false,
-        loop: false
+        loop: true,
     },
     {
         id: uuidv4(),
-        label: 'Music | Lobby',
-        media: 'https://youtu.be/a7C3ij1Me5c',
+        label: 'Intrigue',
+        media: 'https://www.youtube.com/watch?v=yEYxnJB4jZs',
         playlist: false,
-        loop: false
+        loop: true,
     }
 ];
 

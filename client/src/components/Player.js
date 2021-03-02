@@ -1,4 +1,6 @@
 import React, {useContext} from 'react'
+
+import { useStyletron } from 'baseui';
 import {
     H4,
     H5
@@ -30,6 +32,8 @@ export default function Player(props) {
     const {
         player
     } = useRoom();
+
+    const [css, theme] = useStyletron();
 
     const youtubeMeta = media 
         ? extractYoutubeMeta(media.media)
@@ -71,6 +75,9 @@ export default function Player(props) {
                             videoId={media.playlist ? '' : youtubeMeta.id}
                             containerClassName="youtube-wrapper"
                             opts={opts}
+                            onReady={(e) => {
+                                e.target.setVolume(media.volume ? media.volume : 50);
+                            }}
                         />
                         )}>
                     </AspectRatioBoxBody>

@@ -10,7 +10,6 @@ import { Block } from 'baseui/block';
 import { ButtonGroup } from "baseui/button-group";
 import { Button, SHAPE } from "baseui/button";
 import { StyledLink } from "baseui/link";
-import { TriangleRight, Overflow, Plus } from 'baseui/icon';
 import { StyledSpinnerNext } from 'baseui/spinner';
 import { Tag, VARIANT, KIND } from "baseui/tag";
 import { Drawer, ANCHOR } from 'baseui/drawer';
@@ -153,6 +152,7 @@ const mediaList = [
         label: 'Combat',
         media: 'https://www.youtube.com/watch?v=w0sUw735gRw',
         playlist: false,
+        volume: 50,
         loop: true,
     },
     {
@@ -160,6 +160,7 @@ const mediaList = [
         label: 'Adventure',
         media: 'https://www.youtube.com/watch?v=A8qMyBWZNw0',
         playlist: false,
+        volume: 50,
         loop: true,
     },
     {
@@ -167,6 +168,7 @@ const mediaList = [
         label: 'Intrigue',
         media: 'https://www.youtube.com/watch?v=yEYxnJB4jZs',
         playlist: false,
+        volume: 50,
         loop: true,
     }
 ];
@@ -289,8 +291,8 @@ export default function Media(props) {
                                             (isTransitioning === mediaList[el.$index].id)
                                                 ? <StyledSpinnerNext />
                                                 : (media.id === mediaList[el.$index].id)
-                                                    ? <FontAwesomeIcon icon={faVolumeUp} size={32} />
-                                                    : <FontAwesomeIcon icon={faPlay} size={32} />
+                                                    ? <FontAwesomeIcon icon={faVolumeUp} />
+                                                    : <FontAwesomeIcon icon={faPlay} />
                                         }
                                     </Button>
                                 </div>

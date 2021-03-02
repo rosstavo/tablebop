@@ -36,7 +36,10 @@ export default function PlayerController() {
                         // ref={masterVolumeSlider}
                         onChange={(e) => {
                             setMasterVolume(e.value[0]);
-                            player.current.getInternalPlayer().setVolume(e.value[0] * media.volume / 100);
+
+                            if ( player.current ) {
+                                player.current.getInternalPlayer().setVolume(e.value[0] * media.volume / 100);
+                            }
                         }}
                     />
                 </FormControl>

@@ -7,7 +7,8 @@ import { useStyletron } from 'baseui';
 import { Block } from 'baseui/block';
 import { FlexGrid, FlexGridItem } from 'baseui/flex-grid';
 import {
-    SnackbarProvider
+    SnackbarProvider,
+    PLACEMENT
 } from 'baseui/snackbar';
 
 
@@ -75,7 +76,7 @@ export default function Room() {
             { validateUuid(room) ? '' : <Redirect to="/" />}
             <SocketProvider id={room}>
                 <RoomProvider id={room}>
-                    <SnackbarProvider>
+                    <SnackbarProvider placement={PLACEMENT.bottomRight}>
                         <Block
                             flexWrap={[true, true, false]}
                             className={css({

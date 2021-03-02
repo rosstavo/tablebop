@@ -18,7 +18,7 @@ import { Input } from 'baseui/input';
 import { Slider } from "baseui/slider";
 import { Checkbox, STYLE_TYPE, LABEL_PLACEMENT } from "baseui/checkbox";
 import {
-    useSnackbar,
+    useSnackbar
 } from 'baseui/snackbar';
 
 
@@ -306,12 +306,12 @@ export default function Media(props) {
                                     <Button
                                         onClick = {
                                             () => {
-                                                launchMedia(mediaList[el.$index]);
-                                                
                                                 enqueue({
                                                     message: 'Launching new track…',
                                                     startEnhancer: () => <FontAwesomeIcon icon={faStream} />,
                                                 });
+                                                
+                                                launchMedia(mediaList[el.$index]);
 
                                             }
                                         }

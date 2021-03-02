@@ -28,7 +28,7 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 import { useImmerReducer } from 'use-immer';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEdit, faVolumeUp, faPlay, faFileImport, faFileExport, faStream } from '@fortawesome/free-solid-svg-icons'
+import { faEdit, faVolumeUp, faPlay, faFileImport, faFileExport, faStream, faClone, faCheck } from '@fortawesome/free-solid-svg-icons'
 import { faYoutube } from '@fortawesome/free-brands-svg-icons';
 
 
@@ -350,6 +350,23 @@ export default function Media(props) {
                     <Input
                         id="roomUrl"
                         value = { window.location.href }
+                        endEnhancer={() => (
+                            <StyledLink
+                                className={css({
+                                    cursor: 'pointer'
+                                })}
+                                onClick={() => {
+                                    enqueue({
+                                        message: 'Copied to clipboard',
+                                        startEnhancer: () => <FontAwesomeIcon icon={faCheck} />,
+                                    });
+
+                                    navigator.clipboard.writeText(window.location.href);
+                                }}
+                            >
+                                <FontAwesomeIcon icon={faClone} />
+                            </StyledLink>
+                        )}
                     />
                 </FormControl>
             </Block>

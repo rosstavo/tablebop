@@ -104,19 +104,24 @@ function uiReducer(draft, action) {
 
             if (action.payload.id) {
 
-                draft.mediaList.map((mediaItem, index) => {
+                draft.mediaList = draft.mediaList.map((mediaItem, index) => {
 
-                    if (action.payload.id === mediaItem.id) {
-
-                        draft.mediaList[index].label = action.payload.label;
-                        draft.mediaList[index].media = action.payload.media;
-                        draft.mediaList[index].playlist = action.payload.media.includes('list=') ? true : false;
-                        draft.mediaList[index].loop = action.payload.loop;
-                        draft.mediaList[index].volume = action.payload.volume;
-
+                    if (action.payload.id !== mediaItem.id) {
+                        return mediaItem;
                     }
 
+                    return {
+                        'id'      : mediaItem.id,
+                        'label'   : action.payload.label,
+                        'media'   : action.payload.media,
+                        'playlist': action.payload.media.includes('list=') ? true: false,
+                        'loop'    : action.payload.loop,
+                        'volume'  : action.payload.volume
+                    };
+
                 });
+
+                console.log(draft.mediaList);
 
             } else {
                 draft.mediaList.push({
@@ -136,6 +141,7 @@ function uiReducer(draft, action) {
             draft.fields.loop = true;
             draft.fields.volume = [50];
             draft.isDrawerOpen = false;
+            draft.isEditing = false;
 
             return;
         }
@@ -231,7 +237,7 @@ export default function Media(props) {
     } = uiState; 
 
 
-    const [css, theme] = useStyletron();
+    const [css] = useStyletron();
 
     const {enqueue} = useSnackbar();
 

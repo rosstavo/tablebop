@@ -17,10 +17,8 @@ import { FormControl } from 'baseui/form-control';
 import { Input } from 'baseui/input';
 import { Slider } from "baseui/slider";
 import { Checkbox, STYLE_TYPE, LABEL_PLACEMENT } from "baseui/checkbox";
-import {
-    useSnackbar
-} from 'baseui/snackbar';
-
+import { useSnackbar } from 'baseui/snackbar';
+import { StatefulTooltip, PLACEMENT } from "baseui/tooltip";
 
 /**
  * 3rd party libs
@@ -36,6 +34,7 @@ import { faYoutube } from '@fortawesome/free-brands-svg-icons';
  * Contexts
  */
 import {useRoom} from '../contexts/RoomProvider';
+import ImportModal from './ImportModal.js';
 
 /**
  * Reducer for our UI
@@ -61,6 +60,14 @@ function uiReducer(draft, action) {
             draft.mediaList = newState;
 
             localStorage.setItem('tablebop-media', JSON.stringify(newState));
+
+            return;
+        }
+        case 'importList': {
+
+            draft.mediaList = action.payload.mediaList;
+
+            localStorage.setItem('tablebop-media', JSON.stringify(action.payload.mediaList));
 
             return;
         }
@@ -193,11 +200,27 @@ const initialState = {
     }
 }
 
+/**
+ * Export JSON
+ */
+const exportJSON = (jsonData) => {
+    const fileData = JSON.stringify(jsonData);
+    const blob = new Blob([fileData], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+
+    const datetime = new Date();
+
+    link.download = 'tablebop-export-' + datetime.toISOString() + '.json';
+    link.href = url;
+    link.click();
+}
+
 export default function Media(props) {
 
     const [uiState, uiDispatch] = useImmerReducer(uiReducer, initialState); 
 
-    const {media, launchMedia, queue} = useRoom();
+    const {media, launchMedia, queue, setIsImportModalOpen} = useRoom();
 
     const {
         mediaList,
@@ -241,36 +264,40 @@ export default function Media(props) {
                         <>
                             <Label1>
                                 {mediaItem.label}
-                                <StyledLink
-                                    className={css({
-                                        display: 'inline-block',
-                                        marginLeft: '0.5em',
-                                        cursor: 'pointer'
-                                    })}
-                                    onClick={(el) => uiDispatch({
-                                        type: 'editMedia',
-                                        payload: mediaList[index]
-                                    })}
-                                >
-                                    <FontAwesomeIcon icon={faEdit} />
-                                </StyledLink>
-                                <StyledLink
-                                    className={css({
-                                        display: 'inline-block',
-                                        marginLeft: '0.5em',
-                                        cursor: 'pointer'
-                                    })}
-                                    onClick={(el) => {
-                                        queue.current = mediaList[index];
+                                <StatefulTooltip content="Edit" showArrow placement={PLACEMENT.top}>
+                                    <StyledLink
+                                        className={css({
+                                            display: 'inline-block',
+                                            marginLeft: '0.5em',
+                                            cursor: 'pointer'
+                                        })}
+                                        onClick={(el) => uiDispatch({
+                                            type: 'editMedia',
+                                            payload: mediaList[index]
+                                        })}
+                                    >
+                                        <FontAwesomeIcon icon={faEdit} />
+                                    </StyledLink>
+                                </StatefulTooltip>
+                                <StatefulTooltip content="Play after current track" showArrow placement={PLACEMENT.top}>
+                                    <StyledLink
+                                        className={css({
+                                            display: 'inline-block',
+                                            marginLeft: '0.5em',
+                                            cursor: 'pointer'
+                                        })}
+                                        onClick={(el) => {
+                                            queue.current = mediaList[index];
 
-                                        enqueue({
-                                            message: `Media queued: ${mediaList[index].label}`,
-                                            startEnhancer: () => <FontAwesomeIcon icon={faStream} />,
-                                        });
-                                    }}
-                                >
-                                    <FontAwesomeIcon icon={faStream} />
-                                </StyledLink>
+                                            enqueue({
+                                                message: `Track queued: ${mediaList[index].label}`,
+                                                startEnhancer: () => <FontAwesomeIcon icon={faStream} />,
+                                            });
+                                        }}
+                                    >
+                                        <FontAwesomeIcon icon={faStream} />
+                                    </StyledLink>
+                                </StatefulTooltip>
                             </Label1>
                             <Paragraph1 margin="0">
                                 {mediaItem.playlist
@@ -335,13 +362,15 @@ export default function Media(props) {
 
             <Block className={css({
                 padding: '0 2em'
-            })} >
+            })}>
                 <ButtonGroup>
                     <Button onClick={() => uiDispatch({ type: 'addMedia' })} startEnhancer={() => <FontAwesomeIcon icon={faYoutube}/>}>Add Media</Button>
-                    <Button onClick={() => alert("Doesn't work yet")} startEnhancer={() => <FontAwesomeIcon icon={faFileImport}/>} disabled>Import</Button>
-                    <Button onClick={() => alert("Doesn't work yet")} startEnhancer={() => <FontAwesomeIcon icon={faFileExport}/>} disabled>Export</Button>
+                    <Button onClick={() => setIsImportModalOpen(true)} startEnhancer={() => <FontAwesomeIcon icon={faFileImport}/>}>Import</Button>
+                    <Button onClick={() => exportJSON(mediaList)} startEnhancer={() => <FontAwesomeIcon icon={faFileExport} />}>Export</Button>
                 </ButtonGroup>
             </Block>
+
+            <ImportModal dispatch={uiDispatch} />
 
             <Block className={css({
                 padding: '2em'
@@ -376,11 +405,11 @@ export default function Media(props) {
                 isOpen={isDrawerOpen}
                 anchor={ANCHOR.left}
             >
-                <H4>Add Media</H4>
+                <H4>Add Track</H4>
 
                 <form>
 
-                    <FormControl label="Label" caption="Give your media a name">
+                    <FormControl label="Label" caption="Give your track a name">
                         <Input
                             id="label"
                             value={fields.label}
@@ -420,7 +449,7 @@ export default function Media(props) {
                         />
                     </FormControl>
 
-                    <FormControl label="Loop" caption="If media is a playlist, this will loop the playlist. Otherwise, it will loop the single video.">
+                    <FormControl label="Loop" caption="If track is a playlist, this will loop the playlist. Otherwise, it will loop the single video.">
                         <Checkbox
                             checked={fields.loop}
                             checkmarkType={STYLE_TYPE.toggle_round}
@@ -451,7 +480,7 @@ export default function Media(props) {
                             });
                         }}
                     >
-                        Save Media
+                        Save Track
                     </Button>
                 </form>
 

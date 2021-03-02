@@ -23,6 +23,7 @@ export function RoomProvider({ id, children }) {
 
     const [media, setMedia] = useState('');
     const [masterVolume, setMasterVolume] = useState(100);
+    const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
     const socket = useSocket();
 
@@ -66,6 +67,8 @@ export function RoomProvider({ id, children }) {
             // If volume less than or equal to zero, we're done
             if (volume <= 0) {
 
+                queue.current = '';
+
                 setMedia(media);
                 
                 clearInterval(fadeOut);
@@ -107,7 +110,9 @@ export function RoomProvider({ id, children }) {
         masterVolume,
         setMasterVolume,
         masterVolumeRef,
-        queue
+        queue,
+        isImportModalOpen,
+        setIsImportModalOpen
     };
 
     return (

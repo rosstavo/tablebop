@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 
 /**
  * Base Web
@@ -16,9 +16,15 @@ import { useRoom } from '../contexts/RoomProvider.js';
 
 export default function PlayerController() {
 
-    const { player, masterVolumeSlider, media, masterVolume, setMasterVolume } = useRoom();
+    const { player, masterVolumeSlider, media, masterVolumeRef } = useRoom();
+
+    const [masterVolume, setMasterVolume] = useState(100);
 
     const [css] = useStyletron();
+
+    const setNewMasterVolumeRef = (e) => {
+        masterVolumeRef.current = e.value[0];
+    }
 
     return (
         <>
@@ -27,15 +33,14 @@ export default function PlayerController() {
                 width: "100%",
                 textAlign: 'center'
             })}>
-                <FormControl
-                    label="Master Volume"
-                    caption="Setting the master volume will reload the YouTube player."
-                >
+                <FormControl label="Master Volume">
                     <Slider 
+                        ref={masterVolumeSlider}
                         value={[masterVolume]}
-                        // ref={masterVolumeSlider}
                         onChange={(e) => {
                             setMasterVolume(e.value[0]);
+
+                            setNewMasterVolumeRef(e);
 
                             if ( player.current ) {
                                 player.current.getInternalPlayer().setVolume(e.value[0] * media.volume / 100);

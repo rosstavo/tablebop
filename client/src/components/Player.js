@@ -32,7 +32,7 @@ export default function Player(props) {
     const appState = useContext(AppStateContext);
     const { isAdmin } = appState;
 
-    const { player, masterVolumeSlider, masterVolume } = useRoom();
+    const { player, masterVolumeRef } = useRoom();
 
     const [css, theme] = useStyletron();
 
@@ -74,7 +74,7 @@ export default function Player(props) {
                             containerClassName="youtube-wrapper"
                             opts={opts}
                             onReady={(e) => {
-                                e.target.setVolume((media.volume ? media.volume : 50) * masterVolume / 100);
+                                e.target.setVolume((media.volume ? media.volume : 50) * masterVolumeRef.current / 100);
                             }}
                         />
                         )}>

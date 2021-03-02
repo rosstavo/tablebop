@@ -28,6 +28,7 @@ export function RoomProvider({ id, children }) {
 
     const player = useRef('');
     const masterVolumeSlider = useRef('');
+    const masterVolumeRef = useRef(100);
 
     /**
      * Handle launch
@@ -103,7 +104,8 @@ export function RoomProvider({ id, children }) {
         player,
         masterVolumeSlider,
         masterVolume,
-        setMasterVolume
+        setMasterVolume,
+        masterVolumeRef
     };
 
     return (

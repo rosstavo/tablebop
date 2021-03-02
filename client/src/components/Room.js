@@ -25,6 +25,7 @@ import Media from './Media.js';
 import { RoomProvider, useRoom } from '../contexts/RoomProvider';
 import { SocketProvider } from '../contexts/SocketProvider';
 import { AppStateContext, AppDispatchContext } from './App.js';
+import PlayerController from './PlayerController.js';
 
 /**
  * Export Contexts
@@ -106,8 +107,10 @@ export default function Room() {
                             alignItems: 'center',
                             backgroundColor: theme.colors.backgroundPrimary,
                             padding: '3em',
+                            overflow: 'scroll'
                         })}>
                             <Player room={room} />
+                            <PlayerController />
                         </Block>
                     </Block>
                 </RoomProvider>

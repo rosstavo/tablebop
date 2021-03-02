@@ -1,4 +1,4 @@
-import React, {useContext} from 'react'
+import React, {useContext, useRef, useEffect} from 'react'
 
 import { useStyletron } from 'baseui';
 import {
@@ -9,6 +9,10 @@ import {
     AspectRatioBox,
     AspectRatioBoxBody,
 } from 'baseui/aspect-ratio-box';
+import { FormControl } from "baseui/form-control";
+import {StatefulSlider} from 'baseui/slider';
+import { Block} from 'baseui/block';
+
 import { StyledLink } from "baseui/link";
 import { Button, KIND, SIZE } from "baseui/button";
 import YouTube from 'react-youtube';
@@ -21,7 +25,6 @@ import { AppStateContext } from './App.js';
 import { extractYoutubeMeta } from './../Helpers.js';
 import { ArrowLeft } from 'baseui/icon';
 
-
 export default function Player(props) {
 
     const { media } = useRoom();
@@ -29,9 +32,7 @@ export default function Player(props) {
     const appState = useContext(AppStateContext);
     const { isAdmin } = appState;
 
-    const {
-        player
-    } = useRoom();
+    const { player, masterVolumeSlider, masterVolume } = useRoom();
 
     const [css, theme] = useStyletron();
 
@@ -42,9 +43,6 @@ export default function Player(props) {
             playlist: false
         };
 
-    // console.log(youtubeMeta);
-    
-    
 
     let opts = media
         ? {
@@ -76,7 +74,7 @@ export default function Player(props) {
                             containerClassName="youtube-wrapper"
                             opts={opts}
                             onReady={(e) => {
-                                e.target.setVolume(media.volume ? media.volume : 50);
+                                e.target.setVolume((media.volume ? media.volume : 50) * masterVolume / 100);
                             }}
                         />
                         )}>
@@ -85,15 +83,6 @@ export default function Player(props) {
 
                 : <H4>{isAdmin ? 'Nothing playing right now.' : 'No media launched since you joined.'}</H4>
             }
-            <Button
-                $as="a"
-                href="/"
-                kind={KIND.tertiary}
-                size={SIZE.compact}
-                startEnhancer={() => <ArrowLeft size="24px" />}
-            >
-                Leave Room
-            </Button>
         </>
     )
 }

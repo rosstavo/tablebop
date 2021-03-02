@@ -22,10 +22,12 @@ export function useRoom() {
 export function RoomProvider({ id, children }) {
 
     const [media, setMedia] = useState('');
+    const [masterVolume, setMasterVolume] = useState(100);
 
     const socket = useSocket();
 
     const player = useRef('');
+    const masterVolumeSlider = useRef('');
 
     /**
      * Handle launch
@@ -98,7 +100,10 @@ export function RoomProvider({ id, children }) {
     const value = {
         media,
         launchMedia,
-        player
+        player,
+        masterVolumeSlider,
+        masterVolume,
+        setMasterVolume
     };
 
     return (

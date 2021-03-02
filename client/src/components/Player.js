@@ -1,29 +1,19 @@
-import React, {useContext, useRef, useEffect} from 'react'
+import React, {useContext} from 'react'
 
-import { useStyletron } from 'baseui';
 import {
-    H4,
-    H5
+    H4
 } from 'baseui/typography';
 import {
     AspectRatioBox,
     AspectRatioBoxBody,
 } from 'baseui/aspect-ratio-box';
-import { FormControl } from "baseui/form-control";
-import {StatefulSlider} from 'baseui/slider';
-import { Block} from 'baseui/block';
-
-import { StyledLink } from "baseui/link";
-import { Button, KIND, SIZE } from "baseui/button";
 import YouTube from 'react-youtube';
 
 
-import { RoomStateContext } from './Room.js';
 import { useRoom } from '../contexts/RoomProvider.js';
 import { AppStateContext } from './App.js';
 
 import { extractYoutubeMeta } from './../Helpers.js';
-import { ArrowLeft } from 'baseui/icon';
 
 export default function Player(props) {
 
@@ -32,9 +22,7 @@ export default function Player(props) {
     const appState = useContext(AppStateContext);
     const { isAdmin } = appState;
 
-    const { player, masterVolumeRef } = useRoom();
-
-    const [css, theme] = useStyletron();
+    const { player, masterVolumeRef, queue, launchMedia } = useRoom();
 
     const youtubeMeta = media 
         ? extractYoutubeMeta(media.media)
@@ -75,6 +63,12 @@ export default function Player(props) {
                             opts={opts}
                             onReady={(e) => {
                                 e.target.setVolume((media.volume ? media.volume : 50) * masterVolumeRef.current / 100);
+                            }}
+                            onEnd={(e) => {
+                                if (queue.current) {
+                                    launchMedia(queue.current);
+                                    queue.current = '';
+                                }
                             }}
                         />
                         )}>

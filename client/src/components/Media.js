@@ -17,6 +17,10 @@ import { FormControl } from 'baseui/form-control';
 import { Input } from 'baseui/input';
 import { Slider } from "baseui/slider";
 import { Checkbox, STYLE_TYPE, LABEL_PLACEMENT } from "baseui/checkbox";
+import {
+    useSnackbar,
+} from 'baseui/snackbar';
+
 
 /**
  * 3rd party libs
@@ -24,7 +28,7 @@ import { Checkbox, STYLE_TYPE, LABEL_PLACEMENT } from "baseui/checkbox";
 import { v4 as uuidv4 } from 'uuid';
 import { useImmerReducer } from 'use-immer';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEdit, faVolumeUp, faPlay, faFileImport, faFileExport } from '@fortawesome/free-solid-svg-icons'
+import { faEdit, faVolumeUp, faPlay, faFileImport, faFileExport, faStream } from '@fortawesome/free-solid-svg-icons'
 import { faYoutube } from '@fortawesome/free-brands-svg-icons';
 
 
@@ -193,7 +197,7 @@ export default function Media(props) {
 
     const [uiState, uiDispatch] = useImmerReducer(uiReducer, initialState); 
 
-    const {media, launchMedia} = useRoom();
+    const {media, launchMedia, queue} = useRoom();
 
     const {
         mediaList,
@@ -205,6 +209,8 @@ export default function Media(props) {
 
 
     const [css, theme] = useStyletron();
+
+    const {enqueue} = useSnackbar();
 
     return (
         <>
@@ -248,6 +254,23 @@ export default function Media(props) {
                                 >
                                     <FontAwesomeIcon icon={faEdit} />
                                 </StyledLink>
+                                <StyledLink
+                                    className={css({
+                                        display: 'inline-block',
+                                        marginLeft: '0.5em',
+                                        cursor: 'pointer'
+                                    })}
+                                    onClick={(el) => {
+                                        queue.current = mediaList[index];
+
+                                        enqueue({
+                                            message: `Media queued: ${mediaList[index].label}`,
+                                            startEnhancer: () => <FontAwesomeIcon icon={faStream} />,
+                                        });
+                                    }}
+                                >
+                                    <FontAwesomeIcon icon={faStream} />
+                                </StyledLink>
                             </Label1>
                             <Paragraph1 margin="0">
                                 {mediaItem.playlist
@@ -282,7 +305,15 @@ export default function Media(props) {
                                 >
                                     <Button
                                         onClick = {
-                                            () => launchMedia(mediaList[el.$index])
+                                            () => {
+                                                launchMedia(mediaList[el.$index]);
+                                                
+                                                enqueue({
+                                                    message: 'Launching new track…',
+                                                    startEnhancer: () => <FontAwesomeIcon icon={faStream} />,
+                                                });
+
+                                            }
                                         }
                                         shape={SHAPE.square}
                                     >

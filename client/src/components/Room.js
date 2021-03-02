@@ -6,6 +6,10 @@ import React, { useContext, useRef, useEffect } from 'react';
 import { useStyletron } from 'baseui';
 import { Block } from 'baseui/block';
 import { FlexGrid, FlexGridItem } from 'baseui/flex-grid';
+import {
+    SnackbarProvider
+} from 'baseui/snackbar';
+
 
 /**
  * 3rd party libs
@@ -71,48 +75,50 @@ export default function Room() {
             { validateUuid(room) ? '' : <Redirect to="/" />}
             <SocketProvider id={room}>
                 <RoomProvider id={room}>
-                    <Block
-                        flexWrap={[true, true, false]}
-                        className={css({
-                            height: '100vh',
-                            display: 'flex'
-                        })}
-                    >
-
-                        {
-                            isAdmin
-                                ? <>
-                                    <Block 
-                                    width={['100%','100%', '50%', '33.3%']}
-                                    className={css({
-                                        height: '100vh',
-                                        display: 'flex',
-                                        justifyContent: 'space-between',
-                                        flexDirection: 'column',
-                                        overflow: 'scroll',
-                                    })}>
-                                        <Media room={room} />
-                                    </Block>
-                                </>
-                                : ''
-                        }
-                        
+                    <SnackbarProvider>
                         <Block
-                        width={isAdmin ? ['100%','100%', '50%', '66.7%'] : '100%'}
-                        className={css({
-                            display: 'flex',
-                            height: '100vh',
-                            flexDirection: 'column',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            backgroundColor: theme.colors.backgroundPrimary,
-                            padding: '3em',
-                            overflow: 'scroll'
-                        })}>
-                            <Player room={room} />
-                            <PlayerController />
+                            flexWrap={[true, true, false]}
+                            className={css({
+                                height: '100vh',
+                                display: 'flex'
+                            })}
+                        >
+
+                            {
+                                isAdmin
+                                    ? <>
+                                        <Block 
+                                        width={['100%','100%', '50%', '33.3%']}
+                                        className={css({
+                                            height: '100vh',
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            flexDirection: 'column',
+                                            overflow: 'scroll',
+                                        })}>
+                                            <Media room={room} />
+                                        </Block>
+                                    </>
+                                    : ''
+                            }
+                            
+                            <Block
+                            width={isAdmin ? ['100%','100%', '50%', '66.7%'] : '100%'}
+                            className={css({
+                                display: 'flex',
+                                height: '100vh',
+                                flexDirection: 'column',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                backgroundColor: theme.colors.backgroundPrimary,
+                                padding: '3em',
+                                overflow: 'scroll'
+                            })}>
+                                <Player room={room} />
+                                <PlayerController />
+                            </Block>
                         </Block>
-                    </Block>
+                    </SnackbarProvider>
                 </RoomProvider>
             </SocketProvider>
         </>

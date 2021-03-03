@@ -260,7 +260,6 @@ export default function Media(props) {
             </Block>
             <Block className={css({
                 padding: '0 2em',
-                overflow: 'scrollY',
                 flexGrow: '1',
             })}>
                 <List

@@ -22,7 +22,6 @@ export function useRoom() {
 export function RoomProvider({ id, children }) {
 
     const [media, setMedia] = useState('');
-    const [masterVolume, setMasterVolume] = useState(100);
     const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
     const socket = useSocket();
@@ -107,8 +106,6 @@ export function RoomProvider({ id, children }) {
         launchMedia,
         player,
         masterVolumeSlider,
-        masterVolume,
-        setMasterVolume,
         masterVolumeRef,
         queue,
         isImportModalOpen,

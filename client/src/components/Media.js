@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {createContext, useContext} from 'react';
 
 /**
  * Base Web
@@ -26,7 +26,7 @@ import { StatefulTooltip, PLACEMENT } from "baseui/tooltip";
 import { v4 as uuidv4 } from 'uuid';
 import { useImmerReducer } from 'use-immer';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEdit, faVolumeUp, faPlay, faFileImport, faFileExport, faStream, faClone, faCheck } from '@fortawesome/free-solid-svg-icons'
+import { faEdit, faVolumeUp, faPlay, faFileImport, faFileExport, faStream, faClone, faCheck, faHourglassHalf } from '@fortawesome/free-solid-svg-icons'
 import { faYoutube } from '@fortawesome/free-brands-svg-icons';
 
 
@@ -35,6 +35,9 @@ import { faYoutube } from '@fortawesome/free-brands-svg-icons';
  */
 import {useRoom} from '../contexts/RoomProvider';
 import ImportModal from './ImportModal.js';
+import LauncherButton from './LauncherButton';
+
+export const UIContext = createContext(null); 
 
 /**
  * Reducer for our UI
@@ -145,14 +148,6 @@ function uiReducer(draft, action) {
 
             return;
         }
-        case 'startFade': {
-            draft.isTransitioning = action.payload.id;
-            return;
-        }
-        case 'endFade': {
-            draft.isTransitioning = false;
-            return;
-        }
         default: {
             return;
         }
@@ -197,7 +192,6 @@ const initialState = {
     mediaList: localStorage.getItem('tablebop-media') ? JSON.parse(localStorage.getItem('tablebop-media')) : mediaList, // An array of of media objects available for launch
     isDrawerOpen: false,    // Is the drawer open for editing
     isEditing: false,       // Is the media object in the drawer new or existing
-    isTransitioning: false, // Is the old media fading out, ready to launch new media
     fields: {
         volume: [50],
         media: '',
@@ -224,7 +218,7 @@ const exportJSON = (jsonData) => {
 
 export default function Media(props) {
 
-    const [uiState, uiDispatch] = useImmerReducer(uiReducer, initialState); 
+    const [state, dispatch] = useImmerReducer(uiReducer, initialState); 
 
     const {media, launchMedia, queue, setIsImportModalOpen} = useRoom();
 
@@ -233,8 +227,7 @@ export default function Media(props) {
         isDrawerOpen,
         isEditing,
         fields,
-        isTransitioning
-    } = uiState; 
+    } = state; 
 
 
     const [css] = useStyletron();
@@ -242,7 +235,7 @@ export default function Media(props) {
     const {enqueue} = useSnackbar();
 
     return (
-        <>
+        <UIContext.Provider value={mediaList}>
             <Block className={css({
                 padding: '2em'
             })}
@@ -266,56 +259,64 @@ export default function Media(props) {
                     removable
                     removableByMove
                     items={mediaList.map((mediaItem, index) => (
-                        <>
-                            <Label1>
-                                {mediaItem.label}
-                                <StatefulTooltip content="Edit" showArrow placement={PLACEMENT.top}>
-                                    <StyledLink
-                                        className={css({
-                                            display: 'inline-block',
-                                            marginLeft: '0.5em',
-                                            cursor: 'pointer'
-                                        })}
-                                        onClick={(el) => uiDispatch({
-                                            type: 'editMedia',
-                                            payload: mediaList[index]
-                                        })}
-                                    >
-                                        <FontAwesomeIcon icon={faEdit} />
-                                    </StyledLink>
-                                </StatefulTooltip>
-                                <StatefulTooltip content="Play after current track" showArrow placement={PLACEMENT.top}>
-                                    <StyledLink
-                                        className={css({
-                                            display: 'inline-block',
-                                            marginLeft: '0.5em',
-                                            cursor: 'pointer'
-                                        })}
-                                        onClick={(el) => {
-                                            queue.current = mediaList[index];
+                        <Block className={css({
+                            display: 'flex',
+                            alignItems: 'center'
+                        })}>
+                            <Block>
+                                <LauncherButton index={index} />
+                            </Block>
+                            <Block>
+                                <Label1>
+                                    {mediaItem.label}
+                                    <StatefulTooltip content="Edit" showArrow placement={PLACEMENT.top}>
+                                        <StyledLink
+                                            className={css({
+                                                display: 'inline-block',
+                                                marginLeft: '0.5em',
+                                                cursor: 'pointer'
+                                            })}
+                                            onClick={(el) => dispatch({
+                                                type: 'editMedia',
+                                                payload: mediaList[index]
+                                            })}
+                                        >
+                                            <FontAwesomeIcon icon={faEdit} />
+                                        </StyledLink>
+                                    </StatefulTooltip>
+                                    <StatefulTooltip content="Play after current track" showArrow placement={PLACEMENT.top}>
+                                        <StyledLink
+                                            className={css({
+                                                display: 'inline-block',
+                                                marginLeft: '0.5em',
+                                                cursor: 'pointer'
+                                            })}
+                                            onClick={(el) => {
+                                                queue.current = mediaList[index];
 
-                                            enqueue({
-                                                message: `Track queued: ${mediaList[index].label}`,
-                                                startEnhancer: () => <FontAwesomeIcon icon={faStream} />,
-                                            });
-                                        }}
-                                    >
-                                        <FontAwesomeIcon icon={faStream} />
-                                    </StyledLink>
-                                </StatefulTooltip>
-                            </Label1>
-                            <Paragraph1 margin="0">
-                                {mediaItem.playlist
-                                    ? <Tag variant={VARIANT.solid} kind={KIND.red} closeable={false}>Playlist</Tag>
-                                    : <Tag variant={VARIANT.solid} kind={KIND.blue} closeable={false}>Single</Tag>
-                                }
-                                {mediaItem.loop ? <Tag closeable={false}>Loop</Tag> : ''}
-                                {mediaItem.volume ? <Tag closeable={false}>Vol {mediaItem.volume}</Tag> : ''}
-                            </Paragraph1>
-                        </>
+                                                enqueue({
+                                                    message: `Track queued: ${mediaList[index].label}`,
+                                                    startEnhancer: () => <FontAwesomeIcon icon={faStream} />,
+                                                });
+                                            }}
+                                        >
+                                            <FontAwesomeIcon icon={faStream} />
+                                        </StyledLink>
+                                    </StatefulTooltip>
+                                </Label1>
+                                <Paragraph1 margin="0">
+                                    {mediaItem.playlist
+                                        ? <Tag variant={VARIANT.solid} kind={KIND.red} closeable={false}>Playlist</Tag>
+                                        : <Tag variant={VARIANT.solid} kind={KIND.blue} closeable={false}>Single</Tag>
+                                    }
+                                    {mediaItem.loop ? <Tag closeable={false}>Loop</Tag> : ''}
+                                    {mediaItem.volume ? <Tag closeable={false}>Vol {mediaItem.volume}</Tag> : ''}
+                                </Paragraph1>
+                            </Block>
+                        </Block>
                     ))}
                     onChange={({ oldIndex, newIndex}) =>
-                        uiDispatch({
+                        dispatch({
                             type: 'updateList',
                             payload: {
                                 mediaList: mediaList,
@@ -325,42 +326,7 @@ export default function Media(props) {
                         })
                     }
                     overrides={{
-                        DragHandle: el => {
-                            const [css] = useStyletron();
-                            return (
-                                <div
-                                    className={css({
-                                        marginRight: '1em',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                    })}
-                                >
-                                    <Button
-                                        onClick = {
-                                            () => {
-                                                enqueue({
-                                                    message: 'Launching new track…',
-                                                    startEnhancer: () => <FontAwesomeIcon icon={faStream} />,
-                                                });
-                                                
-                                                launchMedia(mediaList[el.$index]);
-
-                                            }
-                                        }
-                                        shape={SHAPE.square}
-                                    >
-                                        {/* Set the icon inside the button */}
-                                        {
-                                            (isTransitioning === mediaList[el.$index].id)
-                                                ? <StyledSpinnerNext />
-                                                : (media.id === mediaList[el.$index].id)
-                                                    ? <FontAwesomeIcon icon={faVolumeUp} />
-                                                    : <FontAwesomeIcon icon={faPlay} />
-                                        }
-                                    </Button>
-                                </div>
-                            );
-                        },
+                        DragHandle: () => false
                     }}
                 />
             </Block>
@@ -369,13 +335,13 @@ export default function Media(props) {
                 padding: '0 2em'
             })}>
                 <ButtonGroup>
-                    <Button onClick={() => uiDispatch({ type: 'addMedia' })} startEnhancer={() => <FontAwesomeIcon icon={faYoutube}/>}>Add Media</Button>
+                    <Button onClick={() => dispatch({ type: 'addMedia' })} startEnhancer={() => <FontAwesomeIcon icon={faYoutube}/>}>Add Media</Button>
                     <Button onClick={() => setIsImportModalOpen(true)} startEnhancer={() => <FontAwesomeIcon icon={faFileImport}/>}>Import</Button>
                     <Button onClick={() => exportJSON(mediaList)} startEnhancer={() => <FontAwesomeIcon icon={faFileExport} />}>Export</Button>
                 </ButtonGroup>
             </Block>
 
-            <ImportModal dispatch={uiDispatch} />
+            <ImportModal dispatch={dispatch} />
 
             <Block className={css({
                 padding: '2em'
@@ -385,28 +351,30 @@ export default function Media(props) {
                         id="roomUrl"
                         value = { window.location.href }
                         endEnhancer={() => (
-                            <StyledLink
-                                className={css({
-                                    cursor: 'pointer'
-                                })}
-                                onClick={() => {
-                                    enqueue({
-                                        message: 'Copied to clipboard',
-                                        startEnhancer: () => <FontAwesomeIcon icon={faCheck} />,
-                                    });
+                            <StatefulTooltip content="Copy to clipboard" showArrow placement={PLACEMENT.top}>
+                                <StyledLink
+                                    className={css({
+                                        cursor: 'pointer'
+                                    })}
+                                    onClick={() => {
+                                        enqueue({
+                                            message: 'Copied to clipboard',
+                                            startEnhancer: () => <FontAwesomeIcon icon={faCheck} />,
+                                        });
 
-                                    navigator.clipboard.writeText(window.location.href);
-                                }}
-                            >
-                                <FontAwesomeIcon icon={faClone} />
-                            </StyledLink>
+                                        navigator.clipboard.writeText(window.location.href);
+                                    }}
+                                >
+                                    <FontAwesomeIcon icon={faClone} />
+                                </StyledLink>
+                            </StatefulTooltip>
                         )}
                     />
                 </FormControl>
             </Block>
             
             <Drawer
-                onClose={() => uiDispatch({ type: 'closeDrawer' })}
+                onClose={() => dispatch({ type: 'closeDrawer' })}
                 isOpen={isDrawerOpen}
                 anchor={ANCHOR.left}
             >
@@ -418,7 +386,7 @@ export default function Media(props) {
                         <Input
                             id="label"
                             value={fields.label}
-                            onChange={(e) => uiDispatch({ 
+                            onChange={(e) => dispatch({ 
                                 type: 'updateField',
                                 fieldName: 'label',
                                 payload: e.currentTarget.value
@@ -430,7 +398,7 @@ export default function Media(props) {
                         <Input
                             id="media"
                             value={fields.media}
-                            onChange={(e) => uiDispatch({ 
+                            onChange={(e) => dispatch({ 
                                 type: 'updateField',
                                 fieldName: 'media',
                                 payload: e.currentTarget.value
@@ -446,7 +414,7 @@ export default function Media(props) {
                             max={100}
                             step={10}
                             marks
-                            onChange={({value}) => uiDispatch({
+                            onChange={({value}) => dispatch({
                                 type: 'updateField',
                                 fieldName: 'volume',
                                 payload: value
@@ -459,7 +427,7 @@ export default function Media(props) {
                             checked={fields.loop}
                             checkmarkType={STYLE_TYPE.toggle_round}
                             labelPlacement={LABEL_PLACEMENT.right}
-                            onChange={(e) => uiDispatch({
+                            onChange={(e) => dispatch({
                                 type: 'updateField',
                                 fieldName: 'loop',
                                 payload: e.currentTarget.checked
@@ -473,7 +441,7 @@ export default function Media(props) {
                         onClick={(e) => {
                             e.preventDefault();
 
-                            uiDispatch({
+                            dispatch({
                                 type: 'saveMedia',
                                 payload: {
                                     id: isEditing ? isEditing : '',
@@ -490,6 +458,6 @@ export default function Media(props) {
                 </form>
 
             </Drawer>
-        </>
+        </UIContext.Provider>
     );
 }

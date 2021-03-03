@@ -8,8 +8,16 @@ import { Block } from 'baseui/block';
 import { FormControl } from "baseui/form-control";
 import {Slider} from 'baseui/slider';
 
+import {
+    H6
+} from 'baseui/typography';
+
 import { Button, KIND, SIZE } from "baseui/button";
 import { ArrowLeft } from 'baseui/icon';
+
+import { Notification } from "baseui/notification";
+
+
 import { faVolumeUp } from '@fortawesome/free-solid-svg-icons'
 
 import { useRoom } from '../contexts/RoomProvider.js';
@@ -35,6 +43,23 @@ export default function PlayerController() {
                 width: "100%",
                 textAlign: 'center'
             })}>
+                <Notification
+                    autoHideDuration={0}
+                    closeable
+                    overrides = {
+                        {
+                            Body: {
+                                style: {
+                                    width: 'auto',
+                                    margin: '0 0 2em'
+                                }
+                            },
+                        }
+                    }
+                >
+                    {() => "Leave this page open in a browser window (otherwise the music will not change!)"}
+                </Notification>
+
                 <FormControl
                     label={() => (
                         <FontAwesomeIcon icon={faVolumeUp} />

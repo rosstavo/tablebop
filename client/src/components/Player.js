@@ -70,6 +70,9 @@ export default function Player(props) {
                                     queue.current = '';
                                 }
                             }}
+                            onError={(e) => {
+                                console.log(e);
+                            }}
                         />
                         )}>
                     </AspectRatioBoxBody>

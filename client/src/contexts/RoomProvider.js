@@ -9,6 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
  * Custom Hooks
  */
 import { useSocket } from './SocketProvider';
+import { extractYoutubeMeta } from '../Helpers.js';
 
 /**
  * Context
@@ -21,7 +22,7 @@ export function useRoom() {
 
 export function RoomProvider({ id, children }) {
 
-    const [media, setMedia] = useState('');
+    const [isActive, setIsActive] = useState(false);
     const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
     const socket = useSocket();
@@ -30,6 +31,7 @@ export function RoomProvider({ id, children }) {
     const masterVolumeSlider = useRef('');
     const masterVolumeRef = useRef(100);
     const queue = useRef('');
+    const track = useRef('');
 
     /**
      * Handle launch
@@ -37,13 +39,21 @@ export function RoomProvider({ id, children }) {
     const launchHandler = useCallback( async (media) => {
 
         if (!media) {
+            setIsActive(false);
             return;
         }
 
-        if (!player.current) {
-            setMedia(media);
+
+        if (!isActive) {
+            
+            track.current = media;
+            
+            setIsActive(true);
+
             return;
         }
+
+        const launchData = extractYoutubeMeta(media.media);
 
         const iframe = player.current.getInternalPlayer();
 
@@ -68,15 +78,29 @@ export function RoomProvider({ id, children }) {
 
                 queue.current = '';
 
-                setMedia(media);
+                if (media.loop) {
+                    iframe.loadPlaylist( launchData.playlist ? launchData.id : [launchData.id], 0, 0 );
+                } else {
+                    iframe.loadVideoById(launchData.id, 0);
+                }
+
+                iframe.unMute();
+
+                setTimeout(() => {
+                    iframe.setVolume(media.volume * masterVolumeRef.current / 100);
+                }, 500);
                 
+                track.current = media;
+
+                // setMedia(media);
+
                 clearInterval(fadeOut);
             }
 
         }, 100);
 
         // setMedia(media);
-    }, [setMedia, player]);
+    }, [player, isActive]);
 
     /**
      * Listen for media updates
@@ -95,21 +119,26 @@ export function RoomProvider({ id, children }) {
     /**
      * Update Media 
      */
-    function launchMedia(media) {
-        socket.emit('change-media', { media });
+    const launchMedia = useCallback((media) => {
+            socket.emit('change-media', {
+                media
+            });
 
-        launchHandler(media);
-    }
+            launchHandler(media);
+        }, [socket, launchHandler]
+    )
 
     const value = {
-        media,
         launchMedia,
         player,
+        track,
         masterVolumeSlider,
         masterVolumeRef,
         queue,
         isImportModalOpen,
-        setIsImportModalOpen
+        setIsImportModalOpen,
+        isActive,
+        setIsActive
     };
 
     return (

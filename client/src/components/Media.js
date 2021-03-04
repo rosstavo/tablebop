@@ -1,4 +1,4 @@
-import React, {createContext, useContext} from 'react';
+import React, {createContext, useContext, useEffect} from 'react';
 
 /**
  * Base Web
@@ -26,7 +26,7 @@ import { StatefulTooltip, PLACEMENT } from "baseui/tooltip";
 import { v4 as uuidv4 } from 'uuid';
 import { useImmerReducer } from 'use-immer';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEdit, faVolumeUp, faPlay, faFileImport, faFileExport, faStream, faClone, faCheck, faHourglassHalf } from '@fortawesome/free-solid-svg-icons'
+import { faEdit, faFileImport, faFileExport, faStream, faClone, faCheck, faTimes } from '@fortawesome/free-solid-svg-icons'
 import { faYoutube } from '@fortawesome/free-brands-svg-icons';
 
 
@@ -37,7 +37,8 @@ import {useRoom} from '../contexts/RoomProvider';
 import ImportModal from './ImportModal.js';
 import LauncherButton from './LauncherButton';
 
-export const UIContext = createContext(null); 
+export const UIStateContext = createContext(null); 
+export const UIDispatchContext = createContext(null); 
 
 /**
  * Reducer for our UI
@@ -45,6 +46,44 @@ export const UIContext = createContext(null);
 function uiReducer(draft, action) {
 
     switch (action.type) {
+        case 'setActiveTrack' : {
+            draft.activeTrack = action.payload;
+            return;
+        }
+        case 'updatePlayerState' : {
+
+            switch (action.payload) {
+                case -1: {
+                    draft.playerState = 'unstarted';
+                    return
+                }
+                case 0 : {
+                    draft.playerState = 'ended';
+                    return;
+                }
+                case 1 : {
+                    draft.playerState = 'playing';
+                    return;
+                }
+                case 2 : {
+                    draft.playerState = 'paused';
+                    return;
+                }
+                case 3 : {
+                    draft.playerState = 'buffering';
+                    return;
+                }
+                case 5 : {
+                    draft.playerState = 'video cued';
+                    return;
+                }
+                default: {
+                    draft.playerState = false;
+                }
+            }
+
+            return;
+        }
         case 'updateField': {
             draft.fields[action.fieldName] = action.payload;
             return;
@@ -192,6 +231,8 @@ const initialState = {
     mediaList: localStorage.getItem('tablebop-media') ? JSON.parse(localStorage.getItem('tablebop-media')) : mediaList, // An array of of media objects available for launch
     isDrawerOpen: false,    // Is the drawer open for editing
     isEditing: false,       // Is the media object in the drawer new or existing
+    activeTrack: false,
+    playerState: false,
     fields: {
         volume: [50],
         media: '',
@@ -220,244 +261,294 @@ export default function Media(props) {
 
     const [state, dispatch] = useImmerReducer(uiReducer, initialState); 
 
-    const {media, launchMedia, queue, setIsImportModalOpen} = useRoom();
+    const {queue, setIsImportModalOpen, launchMedia, isActive, player} = useRoom();
 
     const {
         mediaList,
         isDrawerOpen,
         isEditing,
         fields,
+        playerState
     } = state; 
-
 
     const [css] = useStyletron();
 
     const {enqueue} = useSnackbar();
 
+    useEffect(() => {
+
+        if (player.current) {
+            player.current.getInternalPlayer().addEventListener('onStateChange', (e) => {
+                dispatch({
+                    type: 'updatePlayerState',
+                    payload: e.data
+                });
+            });
+        } else {
+            dispatch({
+                type: 'updatePlayerState',
+                payload: false
+            });
+        }
+
+    }, [isActive, player, dispatch]);
+
     return (
-        <UIContext.Provider value={mediaList}>
-            <Block className={css({
-                padding: '2em'
-            })}
-            >
-                <img
-                    src="/tablebop-logo.svg"
-                    alt="Tablebop"
-                    className={css({
-                        maxWidth: '16em',
-                        margin: '0 auto',
-                        display: 'block'
-                    })}
-                />
-
-            </Block>
-            <Block className={css({
-                padding: '0 2em',
-                flexGrow: '1',
-            })}>
-                <List
-                    removable
-                    removableByMove
-                    items={mediaList.map((mediaItem, index) => (
-                        <Block className={css({
-                            display: 'flex',
-                            alignItems: 'center'
-                        })}>
-                            <Block>
-                                <LauncherButton index={index} />
-                            </Block>
-                            <Block>
-                                <Label1>
-                                    {mediaItem.label}
-                                    <StatefulTooltip content="Edit" showArrow placement={PLACEMENT.top}>
-                                        <StyledLink
-                                            className={css({
-                                                display: 'inline-block',
-                                                marginLeft: '0.5em',
-                                                cursor: 'pointer'
-                                            })}
-                                            onClick={(el) => dispatch({
-                                                type: 'editMedia',
-                                                payload: mediaList[index]
-                                            })}
-                                        >
-                                            <FontAwesomeIcon icon={faEdit} />
-                                        </StyledLink>
-                                    </StatefulTooltip>
-                                    <StatefulTooltip content="Play after current track" showArrow placement={PLACEMENT.top}>
-                                        <StyledLink
-                                            className={css({
-                                                display: 'inline-block',
-                                                marginLeft: '0.5em',
-                                                cursor: 'pointer'
-                                            })}
-                                            onClick={(el) => {
-                                                queue.current = mediaList[index];
-
-                                                enqueue({
-                                                    message: `Track queued: ${mediaList[index].label}`,
-                                                    startEnhancer: () => <FontAwesomeIcon icon={faStream} />,
-                                                });
-                                            }}
-                                        >
-                                            <FontAwesomeIcon icon={faStream} />
-                                        </StyledLink>
-                                    </StatefulTooltip>
-                                </Label1>
-                                <Paragraph1 margin="0">
-                                    {mediaItem.playlist
-                                        ? <Tag variant={VARIANT.solid} kind={KIND.red} closeable={false}>Playlist</Tag>
-                                        : <Tag variant={VARIANT.solid} kind={KIND.blue} closeable={false}>Single</Tag>
-                                    }
-                                    {mediaItem.loop ? <Tag closeable={false}>Loop</Tag> : ''}
-                                    {mediaItem.volume ? <Tag closeable={false}>Vol {mediaItem.volume}</Tag> : ''}
-                                </Paragraph1>
-                            </Block>
-                        </Block>
-                    ))}
-                    onChange={({ oldIndex, newIndex}) =>
-                        dispatch({
-                            type: 'updateList',
-                            payload: {
-                                mediaList: mediaList,
-                                oldIndex: oldIndex,
-                                newIndex: newIndex
-                            },
-                        })
-                    }
-                    overrides={{
-                        DragHandle: () => false
-                    }}
-                />
-            </Block>
-
-            <Block className={css({
-                padding: '0 2em'
-            })}>
-                <ButtonGroup>
-                    <Button onClick={() => dispatch({ type: 'addMedia' })} startEnhancer={() => <FontAwesomeIcon icon={faYoutube}/>}>Add Media</Button>
-                    <Button onClick={() => setIsImportModalOpen(true)} startEnhancer={() => <FontAwesomeIcon icon={faFileImport}/>}>Import</Button>
-                    <Button onClick={() => exportJSON(mediaList)} startEnhancer={() => <FontAwesomeIcon icon={faFileExport} />}>Export</Button>
-                </ButtonGroup>
-            </Block>
-
-            <ImportModal dispatch={dispatch} />
-
-            <Block className={css({
-                padding: '2em'
-            })}>
-                <FormControl label="Your room URL" caption="Give this to your players">
-                    <Input
-                        id="roomUrl"
-                        value = { window.location.href }
-                        endEnhancer={() => (
-                            <StatefulTooltip content="Copy to clipboard" showArrow placement={PLACEMENT.top}>
-                                <StyledLink
-                                    className={css({
-                                        cursor: 'pointer'
-                                    })}
-                                    onClick={() => {
-                                        enqueue({
-                                            message: 'Copied to clipboard',
-                                            startEnhancer: () => <FontAwesomeIcon icon={faCheck} />,
-                                        });
-
-                                        navigator.clipboard.writeText(window.location.href);
-                                    }}
-                                >
-                                    <FontAwesomeIcon icon={faClone} />
-                                </StyledLink>
-                            </StatefulTooltip>
-                        )}
+        <UIDispatchContext.Provider value={dispatch}>
+            <UIStateContext.Provider value={state}>
+                <Block className={css({
+                    padding: '2em'
+                })}
+                >
+                    <img
+                        src="/tablebop-logo.svg"
+                        alt="Tablebop"
+                        className={css({
+                            maxWidth: '16em',
+                            margin: '0 auto',
+                            display: 'block'
+                        })}
                     />
-                </FormControl>
-            </Block>
-            
-            <Drawer
-                onClose={() => dispatch({ type: 'closeDrawer' })}
-                isOpen={isDrawerOpen}
-                anchor={ANCHOR.left}
-            >
-                <H4>Add Track</H4>
 
-                <form>
+                </Block>
+                <Block className={css({
+                    padding: '0 2em',
+                    flexGrow: '1',
+                })}>
+                    <List
+                        removable
+                        removableByMove
+                        items={mediaList.map((mediaItem, index) => (
+                            <Block className={css({
+                                display: 'flex',
+                                alignItems: 'center'
+                            })}>
+                                <Block>
+                                    <LauncherButton index={index} />
+                                </Block>
+                                <Block>
+                                    <Label1>
+                                        {mediaItem.label}
+                                        <StatefulTooltip content="Edit" showArrow placement={PLACEMENT.top}>
+                                            <StyledLink
+                                                className={css({
+                                                    display: 'inline-block',
+                                                    marginLeft: '0.5em',
+                                                    cursor: 'pointer'
+                                                })}
+                                                onClick={(el) => dispatch({
+                                                    type: 'editMedia',
+                                                    payload: mediaList[index]
+                                                })}
+                                            >
+                                                <FontAwesomeIcon icon={faEdit} />
+                                            </StyledLink>
+                                        </StatefulTooltip>
+                                        <StatefulTooltip content="Play after current track" showArrow placement={PLACEMENT.top}>
+                                            <StyledLink
+                                                className={css({
+                                                    display: 'inline-block',
+                                                    marginLeft: '0.5em',
+                                                    cursor: 'pointer'
+                                                })}
+                                                onClick={(el) => {
+                                                    queue.current = mediaList[index];
 
-                    <FormControl label="Label" caption="Give your track a name">
-                        <Input
-                            id="label"
-                            value={fields.label}
-                            onChange={(e) => dispatch({ 
-                                type: 'updateField',
-                                fieldName: 'label',
-                                payload: e.currentTarget.value
-                            })} 
-                        />
-                    </FormControl>
-
-                    <FormControl label="YouTube URL" caption="This can be an individual video or a playlist">
-                        <Input
-                            id="media"
-                            value={fields.media}
-                            onChange={(e) => dispatch({ 
-                                type: 'updateField',
-                                fieldName: 'media',
-                                payload: e.currentTarget.value
-                            })} 
-                        />
-                    </FormControl>
-
-                    <FormControl label="Volume" caption="Set the launch volume or leave it at the default (50%)">
-                        <Slider
-                            id="volume"
-                            value={fields.volume}
-                            min={0}
-                            max={100}
-                            step={10}
-                            marks
-                            onChange={({value}) => dispatch({
-                                type: 'updateField',
-                                fieldName: 'volume',
-                                payload: value
-                            })} 
-                        />
-                    </FormControl>
-
-                    <FormControl label="Loop" caption="If track is a playlist, this will loop the playlist. Otherwise, it will loop the single video.">
-                        <Checkbox
-                            checked={fields.loop}
-                            checkmarkType={STYLE_TYPE.toggle_round}
-                            labelPlacement={LABEL_PLACEMENT.right}
-                            onChange={(e) => dispatch({
-                                type: 'updateField',
-                                fieldName: 'loop',
-                                payload: e.currentTarget.checked
-                            })}
-                        >
-                            Enable loop
-                        </Checkbox>
-                    </FormControl>
-
-                    <Button
-                        onClick={(e) => {
-                            e.preventDefault();
-
+                                                    enqueue({
+                                                        message: `Track queued: ${mediaList[index].label}`,
+                                                        startEnhancer: () => <FontAwesomeIcon icon={faStream} />,
+                                                    });
+                                                }}
+                                            >
+                                                <FontAwesomeIcon icon={faStream} />
+                                            </StyledLink>
+                                        </StatefulTooltip>
+                                    </Label1>
+                                    <Paragraph1 margin="0">
+                                        {mediaItem.playlist
+                                            ? <Tag variant={VARIANT.solid} kind={KIND.red} closeable={false}>Playlist</Tag>
+                                            : <Tag variant={VARIANT.solid} kind={KIND.blue} closeable={false}>Single</Tag>
+                                        }
+                                        {mediaItem.loop ? <Tag closeable={false}>Loop</Tag> : ''}
+                                        {mediaItem.volume ? <Tag closeable={false}>Vol {mediaItem.volume}</Tag> : ''}
+                                    </Paragraph1>
+                                </Block>
+                            </Block>
+                        ))}
+                        onChange={({ oldIndex, newIndex}) =>
                             dispatch({
-                                type: 'saveMedia',
+                                type: 'updateList',
                                 payload: {
-                                    id: isEditing ? isEditing : '',
-                                    media: fields.media,
-                                    label: fields.label,
-                                    volume: fields.volume[0],
-                                    loop: fields.loop
-                                }
-                            });
+                                    mediaList: mediaList,
+                                    oldIndex: oldIndex,
+                                    newIndex: newIndex
+                                },
+                            })
+                        }
+                        overrides={{
+                            DragHandle: () => false
                         }}
-                    >
-                        Save Track
-                    </Button>
-                </form>
+                    />
+                </Block>
 
-            </Drawer>
-        </UIContext.Provider>
+                <Block className={css({
+                    padding: '0 2em'
+                })}>
+                    <Block
+                        className={css({
+                            marginBottom: '1em',
+                        })}
+                    >
+                        <ButtonGroup>
+                            <Button onClick={() => dispatch({ type: 'addMedia' })} startEnhancer={() => <FontAwesomeIcon icon={faYoutube}/>}>Add Media</Button>
+                            <Button onClick={() => launchMedia(false)} startEnhancer={() => <FontAwesomeIcon icon={faTimes}/>}>Stop</Button>
+                        </ButtonGroup>
+                    </Block>
+
+                    <StyledLink 
+                        onClick={() => setIsImportModalOpen(true)} 
+                        startEnhancer={() => <FontAwesomeIcon icon={faFileImport} />}
+                        className={css({
+                            display: 'inlineBlock',
+                            marginRight: '0.5em',
+                            cursor: 'pointer'
+                        })}
+                    >
+                        Import
+                    </StyledLink>
+
+                    <StyledLink 
+                        onClick={() => exportJSON(mediaList)} 
+                        startEnhancer={() => <FontAwesomeIcon icon={faFileExport} />}
+                        className={css({
+                            display: 'inlineBlock',
+                            marginRight: '0.5em',
+                            cursor: 'pointer'
+                        })}
+                    >
+                        Export
+                    </StyledLink>
+
+                </Block>
+
+                <ImportModal dispatch={dispatch} />
+
+                <Block className={css({
+                    padding: '2em'
+                })}>
+                    <FormControl label="Your room URL" caption="Give this to your players">
+                        <Input
+                            id="roomUrl"
+                            value = { window.location.href }
+                            endEnhancer={() => (
+                                <StatefulTooltip content="Copy to clipboard" showArrow placement={PLACEMENT.top}>
+                                    <StyledLink
+                                        className={css({
+                                            cursor: 'pointer'
+                                        })}
+                                        onClick={() => {
+                                            enqueue({
+                                                message: 'Copied to clipboard',
+                                                startEnhancer: () => <FontAwesomeIcon icon={faCheck} />,
+                                            });
+
+                                            navigator.clipboard.writeText(window.location.href);
+                                        }}
+                                    >
+                                        <FontAwesomeIcon icon={faClone} />
+                                    </StyledLink>
+                                </StatefulTooltip>
+                            )}
+                        />
+                    </FormControl>
+                </Block>
+                
+                <Drawer
+                    onClose={() => dispatch({ type: 'closeDrawer' })}
+                    isOpen={isDrawerOpen}
+                    anchor={ANCHOR.left}
+                >
+                    <H4>Add Track</H4>
+
+                    <form>
+
+                        <FormControl label="Label" caption="Give your track a name">
+                            <Input
+                                id="label"
+                                value={fields.label}
+                                onChange={(e) => dispatch({ 
+                                    type: 'updateField',
+                                    fieldName: 'label',
+                                    payload: e.currentTarget.value
+                                })} 
+                            />
+                        </FormControl>
+
+                        <FormControl label="YouTube URL" caption="This can be an individual video or a playlist">
+                            <Input
+                                id="media"
+                                value={fields.media}
+                                onChange={(e) => dispatch({ 
+                                    type: 'updateField',
+                                    fieldName: 'media',
+                                    payload: e.currentTarget.value
+                                })} 
+                            />
+                        </FormControl>
+
+                        <FormControl label="Volume" caption="Set the launch volume or leave it at the default (50%)">
+                            <Slider
+                                id="volume"
+                                value={fields.volume}
+                                min={0}
+                                max={100}
+                                step={10}
+                                marks
+                                onChange={({value}) => dispatch({
+                                    type: 'updateField',
+                                    fieldName: 'volume',
+                                    payload: value
+                                })} 
+                            />
+                        </FormControl>
+
+                        <FormControl label="Loop" caption="If track is a playlist, this will loop the playlist. Otherwise, it will loop the single video.">
+                            <Checkbox
+                                checked={fields.loop}
+                                checkmarkType={STYLE_TYPE.toggle_round}
+                                labelPlacement={LABEL_PLACEMENT.right}
+                                onChange={(e) => dispatch({
+                                    type: 'updateField',
+                                    fieldName: 'loop',
+                                    payload: e.currentTarget.checked
+                                })}
+                            >
+                                Enable loop
+                            </Checkbox>
+                        </FormControl>
+
+                        <Button
+                            onClick={(e) => {
+                                e.preventDefault();
+
+                                dispatch({
+                                    type: 'saveMedia',
+                                    payload: {
+                                        id: isEditing ? isEditing : '',
+                                        media: fields.media,
+                                        label: fields.label,
+                                        volume: fields.volume[0],
+                                        loop: fields.loop
+                                    }
+                                });
+                            }}
+                        >
+                            Save Track
+                        </Button>
+                    </form>
+
+                </Drawer>
+            </UIStateContext.Provider>
+        </UIDispatchContext.Provider>
     );
 }

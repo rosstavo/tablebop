@@ -122,7 +122,7 @@ export default function Room() {
                                     padding: '3em',
                                     // overflow: 'scroll'
                                 })}>
-                                    <Player room={room} />
+                                    <Player />
                                     <PlayerController />
                                 </Block>
                             </Block>

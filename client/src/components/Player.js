@@ -15,37 +15,41 @@ import { AppStateContext } from './App.js';
 
 import { extractYoutubeMeta } from './../Helpers.js';
 
-export default function Player(props) {
+export default function Player() {
 
-    const { media } = useRoom();
+    // const { media } = useRoom();
 
     const appState = useContext(AppStateContext);
     const { isAdmin } = appState;
 
-    const { player, masterVolumeRef, queue, launchMedia } = useRoom();
+    const { player, masterVolumeRef, queue, track, isActive, launchMedia } = useRoom();
 
-    const youtubeMeta = media 
-        ? extractYoutubeMeta(media.media)
+    console.log(isActive);
+    console.log(track.current);
+
+    const youtubeMeta = isActive && track.current
+        ? extractYoutubeMeta(track.current.media)
         : {
             id: 'TcqP_hSMU3I',
             playlist: false
         };
 
 
-    let opts = media
+    let opts = isActive
         ? {
             height: '100%',
             width: '100%',
             playerVars: {
                 // https://developers.google.com/youtube/player_parameters
                 autoplay: true,
-                loop: media.loop,
+                loop: track.current.loop,
                 modestbranding: true,
                 start: 0,
                 rel: 0,
-                listType: media.playlist ? 'playlist' : '',
-                list: media.playlist ? youtubeMeta.id : '',
-                playlist: (media.playlist || ! media.loop) ? '' : youtubeMeta.id
+                fs: 0,
+                listType: track.current.playlist ? 'playlist' : '',
+                list: track.current.playlist ? youtubeMeta.id : '',
+                playlist: (track.current.playlist || ! track.current.loop) ? '' : youtubeMeta.id
             }
         }
         : {};
@@ -53,21 +57,25 @@ export default function Player(props) {
     return (
         <>
             {
-                media
+                isActive
                 ? <AspectRatioBox aspectRatio={16 / 9} width="100%" marginBottom="1em">
                     <AspectRatioBoxBody as={() => (
                         <YouTube
                             ref={player}
-                            videoId={media.playlist ? '' : youtubeMeta.id}
+                            videoId={track.current.playlist ? '' : youtubeMeta.id}
                             containerClassName="youtube-wrapper"
                             opts={opts}
                             onReady={(e) => {
-                                e.target.setVolume((media.volume ? media.volume : 50) * masterVolumeRef.current / 100);
+                                e.target.setVolume((track.current.volume ? track.current.volume : 50) * masterVolumeRef.current / 100);
                             }}
                             onEnd={(e) => {
+                                console.log(e);
                                 if (queue.current) {
-                                    launchMedia(queue.current);
+                                    let media = queue.current;
+
                                     queue.current = '';
+                                    
+                                    launchMedia(media);
                                 }
                             }}
                             onError={(e) => {

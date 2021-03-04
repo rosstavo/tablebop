@@ -32,8 +32,6 @@ io.on('connection', socket => {
 
 	if (roomData[id]) {
 		socket.local.emit('user-joined', roomData[id]);
-
-		console.log(roomData[id]);
 	}
 
 	socket.on('change-media', ({ media }) => {

@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useContext} from 'react';
 
 /**
  * Base Web
@@ -8,14 +8,8 @@ import { Block } from 'baseui/block';
 import { FormControl } from "baseui/form-control";
 import {Slider} from 'baseui/slider';
 
-import {
-    H6
-} from 'baseui/typography';
-
 import { Button, KIND, SIZE } from "baseui/button";
 import { ArrowLeft } from 'baseui/icon';
-
-import { Notification } from "baseui/notification";
 
 
 import { faVolumeUp } from '@fortawesome/free-solid-svg-icons'
@@ -23,12 +17,19 @@ import { faVolumeUp } from '@fortawesome/free-solid-svg-icons'
 import { useRoom } from '../contexts/RoomProvider.js';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
+// import { UIStateContext } from './Media.js';
+
+
 
 export default function PlayerController() {
 
-    const { player, media, masterVolumeRef } = useRoom();
+    const { player, masterVolumeRef, track } = useRoom();
 
     const [masterVolume, setMasterVolume] = useState(100);
+
+    // FIND ANOTHER WAY TO GET THE ACTIVE TRACK FROM THE UI CONTEXT
+    // const {activeTrack} = useContext(UIStateContext);
+
 
     const [css] = useStyletron();
 
@@ -43,23 +44,6 @@ export default function PlayerController() {
                 width: "100%",
                 textAlign: 'center'
             })}>
-                <Notification
-                    autoHideDuration={0}
-                    closeable
-                    overrides = {
-                        {
-                            Body: {
-                                style: {
-                                    width: 'auto',
-                                    margin: '0 0 2em'
-                                }
-                            },
-                        }
-                    }
-                >
-                    {() => "Leave this page open in a browser window (otherwise the music will not change!)"}
-                </Notification>
-
                 <FormControl
                     label={() => (
                         <FontAwesomeIcon icon={faVolumeUp} />
@@ -74,7 +58,7 @@ export default function PlayerController() {
                             setNewMasterVolumeRef(e);
 
                             if ( player.current ) {
-                                player.current.getInternalPlayer().setVolume(e.value[0] * media.volume / 100);
+                                player.current.getInternalPlayer().setVolume(e.value[0] * track.current.volume / 100);
                             }
                         }}
                     />

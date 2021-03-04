@@ -16,6 +16,7 @@ import {
 import { Block } from 'baseui/block';
 import { Button } from 'baseui/button';
 import ArrowRight from 'baseui/icon/arrow-right';
+import { StyledLink } from 'baseui/link';
 
 /**
  * 3rd party libs
@@ -93,38 +94,78 @@ export default function App() {
                                 padding: '2em',
                                 display: 'flex',
                                 alignItems: 'center',
-                                justifyContent: 'center',
-                                height: '100vh'
+                                justifyContent: 'stretch',
+                                minHeight: '100vh',
+                                flexDirection: 'column',
                             })}>
                                 <Block className={css({
-                                    maxWidth: '30em',
-                                    textAlign: 'center'
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    flexGrow: 1
                                 })}>
-                                    <img
-                                        src="/tablebop-logo.svg"
-                                        alt="Tablebop"
-                                        className={css({
-                                            maxWidth: '20em',
-                                            margin: '0 auto'
-                                        })}
-                                    />
 
-                                    <Paragraph1>A simple way of live-sharing YouTube videos and playlists with your friends, for tabletop roleplaying games</Paragraph1>
                                     <Block className={css({
-                                        marginBottom: '1em'
+                                        maxWidth: '30em',
+                                        textAlign: 'center'
                                     })}>
-                                        <Button
+                                        <img
+                                            src="/tablebop-logo.svg"
+                                            alt="Tablebop"
                                             className={css({
-                                                display: 'block',
-                                                width: '100%',
+                                                maxWidth: '20em',
+                                                margin: '0 auto'
                                             })}
-                                            onClick={(e) => dispatch({type: 'createRoom'})}
-                                            startEnhancer={() => <ArrowRight size="32px" />}
-                                        >
-                                            Create a room
-                                        </Button>
+                                        />
+
+                                        <Paragraph1>A simple way of live-sharing YouTube videos and playlists with your friends, for tabletop roleplaying games</Paragraph1>
+                                        <Block className={css({
+                                            marginBottom: '1em'
+                                        })}>
+                                            <Button
+                                                className={css({
+                                                    display: 'block',
+                                                    width: '100%',
+                                                })}
+                                                onClick={(e) => dispatch({type: 'createRoom'})}
+                                                startEnhancer={() => <ArrowRight size="32px" />}
+                                            >
+                                                Create a room
+                                            </Button>
+                                        </Block>
+                                        <Paragraph3>or ask your DM for their unique room link</Paragraph3>
                                     </Block>
-                                    <Paragraph3>or ask your DM for their unique room link</Paragraph3>
+                                </Block>
+                                <Block>
+                                    <StyledLink
+                                        animateUnderline
+                                        href=""
+                                        className={css({
+                                            display: 'inlineBlock',
+                                            margin: '0 .5em',
+                                        })}>
+                                            User's Guide
+                                    </StyledLink>
+                                    <StyledLink
+                                        animateUnderline
+                                        href="https://www.notion.so/3c602a31a0b746d38052e10f537e90c4?v=0c8b59c67e124f5487c17430e020239c"
+                                        target="_blank"
+                                        className={css({
+                                            display: 'inlineBlock',
+                                            margin: '0 .5em',
+                                        })}>
+                                            Roadmap
+                                    </StyledLink>
+                                    <StyledLink
+                                        animateUnderline
+                                        href="https://ko-fi.com/rossrpg"
+                                        target="_blank"
+                                        className={css({
+                                            display: 'inlineBlock',
+                                            margin: '0 .5em',
+                                        })}>
+                                            Buy me a coffee
+                                    </StyledLink>
                                 </Block>
                             </Block>
                             { room ? <Redirect to={`/${room}`} /> : '' }

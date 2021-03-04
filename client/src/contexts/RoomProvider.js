@@ -53,7 +53,15 @@ export function RoomProvider({ id, children }) {
             return;
         }
 
-        const launchData = extractYoutubeMeta(media.media);
+        let trackId = '';
+
+        if (media.media.includes('list=')) {
+            trackId = media.media.match('[?&]list=([^#\&\?]+)')[1];
+        } else {
+            trackId = media.media.match('youtu(?:.*\/v\/|.*v\=|\.be\/)([A-Za-z0-9_\-]{11})')[1];
+        }
+
+        console.log(player.current);
 
         const iframe = player.current.getInternalPlayer();
 
@@ -78,10 +86,26 @@ export function RoomProvider({ id, children }) {
 
                 queue.current = '';
 
-                if (media.loop) {
-                    iframe.loadPlaylist( launchData.playlist ? launchData.id : [launchData.id], 0, 0 );
+                track.current = media;
+
+                iframe.loadVideoById('', 0, 0);
+
+                if (media.playlist) {
+
+                    iframe.loadPlaylist({
+                        list: trackId,
+                        listType: 'playlist',
+                        index: 0,
+                        startSeconds: 0
+                    });
+
+                    iframe.playVideo();
+
                 } else {
-                    iframe.loadVideoById(launchData.id, 0);
+
+                    iframe.loadPlaylist([trackId], 0, 0);
+
+                    iframe.playVideo();
                 }
 
                 iframe.unMute();
@@ -90,16 +114,12 @@ export function RoomProvider({ id, children }) {
                     iframe.setVolume(media.volume * masterVolumeRef.current / 100);
                 }, 500);
                 
-                track.current = media;
-
-                // setMedia(media);
 
                 clearInterval(fadeOut);
             }
 
         }, 100);
 
-        // setMedia(media);
     }, [player, isActive]);
 
     /**
@@ -126,7 +146,7 @@ export function RoomProvider({ id, children }) {
 
             launchHandler(media);
         }, [socket, launchHandler]
-    )
+    );
 
     const value = {
         launchMedia,

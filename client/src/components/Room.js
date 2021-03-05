@@ -78,7 +78,8 @@ export default function Room() {
                 <RoomProvider id={room}>
                     <SnackbarProvider placement={PLACEMENT.bottomRight}>
                         <Block className={css({
-                            height: '100vh'
+                            height: '100vh',
+                            zIndex: 1
                         })}>
                             <Block
                                 flexWrap={[true, true, false]}
@@ -102,13 +103,13 @@ export default function Room() {
                                                 overflow: 'scroll',
                                                 backgroundColor: theme.colors.backgroundOverlayDark,
                                                 // position: 'relative',
-                                                zIndex: '999'
                                             })}>
                                                 <Block className={css({
                                                     minHeight: '100vh',
                                                     display: 'flex',
                                                     justifyContent: 'space-between',
                                                     flexDirection: 'column',
+                                                    zIndex: 1
                                                 })}>
                                                     <Media room={room} />
                                                 </Block>

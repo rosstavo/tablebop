@@ -3,6 +3,7 @@ import React, {useState} from 'react';
 /**
  * Base Web
  */
+import { useStyletron } from 'baseui';
 import { FileUploader } from "baseui/file-uploader";
 import { Modal, ModalHeader, ModalBody, SIZE, ROLE } from "baseui/modal";
 import { KIND as ButtonKind } from "baseui/button";
@@ -13,6 +14,8 @@ export default function ImportModal(props) {
 
     const { isImportModalOpen, setIsImportModalOpen } = useRoom();
     
+    const [css] = useStyletron();
+
     return (
         <Modal
             onClose={() => setIsImportModalOpen(false)}

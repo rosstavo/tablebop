@@ -66,7 +66,7 @@ export default function Player() {
                     marginBottom="1em"
                     className={css({
                         position: 'relative',
-                        zIndex: 10
+                        zIndex: 0
                     })}
                 >
                     <AspectRatioBoxBody as={() => (
@@ -99,7 +99,7 @@ export default function Player() {
                 : <H4 className={css({
                     textAlign: 'center',
                     position: 'relative',
-                    zIndex: 10
+                    zIndex: 0
                 })}>{isAdmin ? 'Nothing playing right now.' : 'No media launched since you joined.'}</H4>
             }
         </>

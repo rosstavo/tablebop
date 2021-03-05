@@ -44,7 +44,7 @@ export default function PlayerController() {
                 width: "100%",
                 textAlign: 'center',
                 position: 'relative',
-                zIndex: 10
+                zIndex: 0
             })}>
                 <FormControl
                     label={() => (

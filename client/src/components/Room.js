@@ -83,7 +83,7 @@ export default function Room() {
                             <Block
                                 flexWrap={[true, true, false]}
                                 className={css({
-                                    display: 'flex',
+                                    // display: 'flex',
                                     height: '100%'
                                 })}
                             >
@@ -93,9 +93,16 @@ export default function Room() {
                                         ? <>
                                             <Block 
                                             width={['100%','100%', '50%', '33.3%']}
+                                            position={['static', 'static', 'absolute', 'absolute']}
+                                            height={['auto', 'auto', '100vh', '100vh']}
                                             className={css({
                                                 display: 'block',
-                                                overflow: 'scroll'
+                                                left: 0,
+                                                top: 0,
+                                                overflow: 'scroll',
+                                                backgroundColor: theme.colors.backgroundOverlayDark,
+                                                // position: 'relative',
+                                                zIndex: '999'
                                             })}>
                                                 <Block className={css({
                                                     minHeight: '100vh',
@@ -112,6 +119,8 @@ export default function Room() {
                                 
                                 <Block
                                 width={isAdmin ? ['100%','100%', '50%', '66.7%'] : '100%'}
+                                position={['static', 'static', 'absolute', 'absolute']}
+                                height={['auto', 'auto', '100vh', '100vh']}
                                 className={css({
                                     display: 'flex',
                                     // height: '100vh',
@@ -120,6 +129,8 @@ export default function Room() {
                                     alignItems: 'center',
                                     backgroundColor: theme.colors.backgroundPrimary,
                                     padding: '3em',
+                                    top: 0,
+                                    right: 0
                                     // overflow: 'scroll'
                                 })}>
                                     <Player />

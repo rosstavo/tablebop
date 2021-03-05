@@ -42,7 +42,9 @@ export default function PlayerController() {
             <Block className={css({
                 maxWidth: "30em",
                 width: "100%",
-                textAlign: 'center'
+                textAlign: 'center',
+                position: 'relative',
+                zIndex: 10
             })}>
                 <FormControl
                     label={() => (

@@ -1,6 +1,9 @@
 import React, {useContext} from 'react'
 
 import {
+    useStyletron
+} from 'baseui';
+import {
     H4
 } from 'baseui/typography';
 import {
@@ -24,8 +27,7 @@ export default function Player() {
 
     const { player, masterVolumeRef, queue, track, isActive, launchMedia } = useRoom();
 
-    console.log(isActive);
-    console.log(track.current);
+    const [css] = useStyletron();
 
     const youtubeMeta = isActive && track.current
         ? extractYoutubeMeta(track.current.media)
@@ -58,7 +60,15 @@ export default function Player() {
         <>
             {
                 isActive
-                ? <AspectRatioBox aspectRatio={16 / 9} width="100%" marginBottom="1em">
+                ? <AspectRatioBox
+                    aspectRatio={16 / 9}
+                    width="100%"
+                    marginBottom="1em"
+                    className={css({
+                        position: 'relative',
+                        zIndex: 10
+                    })}
+                >
                     <AspectRatioBoxBody as={() => (
                         <YouTube
                             ref={player}
@@ -86,7 +96,11 @@ export default function Player() {
                     </AspectRatioBoxBody>
                 </AspectRatioBox>
 
-                : <H4>{isAdmin ? 'Nothing playing right now.' : 'No media launched since you joined.'}</H4>
+                : <H4 className={css({
+                    textAlign: 'center',
+                    position: 'relative',
+                    zIndex: 10
+                })}>{isAdmin ? 'Nothing playing right now.' : 'No media launched since you joined.'}</H4>
             }
         </>
     )

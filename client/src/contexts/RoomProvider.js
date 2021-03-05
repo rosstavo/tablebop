@@ -99,16 +99,14 @@ export function RoomProvider({ id, children }) {
                         startSeconds: 0
                     });
 
-                    iframe.playVideo();
-
                 } else {
 
-                    iframe.loadPlaylist([trackId], 0, 0);
-
-                    iframe.playVideo();
+                    iframe.loadPlaylist([trackId, trackId], 0, 0);
                 }
 
                 iframe.unMute();
+
+                iframe.setLoop(true);
 
                 setTimeout(() => {
                     iframe.setVolume(media.volume * masterVolumeRef.current / 100);

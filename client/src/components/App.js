@@ -139,7 +139,8 @@ export default function App() {
                                 <Block>
                                     <StyledLink
                                         animateUnderline
-                                        href=""
+                                        href="https://www.notion.so/Tablebop-User-s-Guide-10910d45ba35422e800581e110fde57c"
+                                        target="_blank"
                                         className={css({
                                             display: 'inlineBlock',
                                             margin: '0 .5em',

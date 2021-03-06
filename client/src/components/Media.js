@@ -119,7 +119,6 @@ function uiReducer(draft, action) {
             draft.fields.media = '';
             draft.fields.label = '';
             draft.fields.loop = true;
-            draft.fields.icon = 'music';
             draft.fields.volume = [50];
 
             return;
@@ -130,7 +129,6 @@ function uiReducer(draft, action) {
             draft.fields.label = action.payload.label;
             draft.fields.volume = action.payload.volume ? [action.payload.volume] : [50];
             draft.fields.loop = action.payload.loop;
-            draft.fields.icon = action.payload.icon;
             draft.isEditing = action.payload.id;
 
             return;
@@ -161,7 +159,6 @@ function uiReducer(draft, action) {
                         'media'   : action.payload.media,
                         'playlist': action.payload.media.includes('list=') ? true: false,
                         'loop'    : action.payload.loop,
-                        'icon'    : action.payload.icon,
                         'volume'  : action.payload.volume
                     };
 
@@ -176,7 +173,6 @@ function uiReducer(draft, action) {
                     media: action.payload.media,
                     playlist: action.payload.media.includes('list=') ? true : false,
                     loop: action.payload.loop,
-                    icon: action.payload.icon,
                     volume: action.payload.volume,
                 });
             }
@@ -187,7 +183,6 @@ function uiReducer(draft, action) {
             draft.fields.label = '';
             draft.fields.loop = true;
             draft.fields.volume = [50];
-            draft.fields.icon = '';
             draft.isDrawerOpen = false;
             draft.isEditing = false;
 
@@ -244,7 +239,6 @@ const initialState = {
         media: '',
         label: '',
         loop: true,
-        icon: ''
     }
 }
 
@@ -501,34 +495,6 @@ export default function Media(props) {
                                     payload: e.currentTarget.value
                                 })} 
                             />
-                        </FormControl>
-
-                        <FormControl label="Icon" caption="Select an icon for your track">
-                            <RadioGroup
-                                name="icon"
-                                onChange={e => dispatch({
-                                    type: 'updateField',
-                                    fieldName: 'icon',
-                                    payload: e.currentTarget.value
-                                })}
-                                value={fields.icon}
-                            >
-                                <Radio
-                                    value="music"
-                                >
-                                    <FontAwesomeIcon icon={faMusic} />
-                                </Radio>
-                                <Radio
-                                    value="ambience"
-                                >
-                                    <FontAwesomeIcon icon={faMountain} />
-                                </Radio>
-                                <Radio
-                                    value="scene"
-                                >
-                                    <FontAwesomeIcon icon={faFilm} />
-                                </Radio>
-                            </RadioGroup>
                         </FormControl>
 
                         <FormControl label="Volume" caption="Set the launch volume or leave it at the default (50%)">

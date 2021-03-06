@@ -27,7 +27,7 @@ import { Radio, RadioGroup } from 'baseui/radio';
 import { v4 as uuidv4 } from 'uuid';
 import { useImmerReducer } from 'use-immer';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEdit, faFileImport, faFileExport, faStream, faClone, faCheck, faTimes, faMusic, faMountain, faFilm } from '@fortawesome/free-solid-svg-icons'
+import { faEdit, faFileImport, faFileExport, faStream, faClone, faCheck, faTimes, faUndo, faVolumeDown, faVolumeUp } from '@fortawesome/free-solid-svg-icons'
 import { faYoutube } from '@fortawesome/free-brands-svg-icons';
 
 
@@ -370,8 +370,16 @@ export default function Media(props) {
                                             ? <Tag variant={VARIANT.solid} kind={KIND.red} closeable={false}>Playlist</Tag>
                                             : <Tag variant={VARIANT.solid} kind={KIND.blue} closeable={false}>Single</Tag>
                                         }
-                                        {mediaItem.loop ? <Tag closeable={false}>Loop</Tag> : ''}
-                                        {mediaItem.volume ? <Tag closeable={false}>Vol {mediaItem.volume}</Tag> : ''}
+                                        {mediaItem.loop 
+                                            ? <Tag closeable={false}><FontAwesomeIcon icon={faUndo} size="xs" /> Loop</Tag> 
+                                            : ''
+                                        }
+                                        {(mediaItem.volume && mediaItem.volume !== 50) 
+                                            ? <Tag closeable={false}>
+                                                <FontAwesomeIcon icon={(mediaItem.volume < 50) ? faVolumeDown : faVolumeUp} size="xs" /> Vol {mediaItem.volume}
+                                            </Tag> 
+                                            : ''
+                                        }
                                     </Paragraph1>
                                 </Block>
                             </Block>

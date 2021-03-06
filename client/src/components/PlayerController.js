@@ -60,6 +60,7 @@ export default function PlayerController() {
                             setNewMasterVolumeRef(e);
 
                             if ( player.current ) {
+                                player.current.getInternalPlayer().unMute();
                                 player.current.getInternalPlayer().setVolume(e.value[0] * track.current.volume / 100);
                             }
                         }}

@@ -107,17 +107,14 @@ export function RoomProvider({ id, children }) {
                         iframe.loadVideoById(trackId, 0, 0);
                     }
                 }
-
-                iframe.unMute();
                 
-                if (media.loop) {
-                    iframe.setLoop(true);
-                }
-
                 setTimeout(() => {
+                    iframe.seekTo(0);
+                    iframe.unMute();
                     iframe.setVolume(media.volume * masterVolumeRef.current / 100);
+                    iframe.setShuffle(media.shuffle);
+                    iframe.setLoop(media.loop);
                 }, 500);
-                
 
                 clearInterval(fadeOut);
             }

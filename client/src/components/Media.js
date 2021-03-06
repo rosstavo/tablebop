@@ -27,7 +27,7 @@ import { Radio, RadioGroup } from 'baseui/radio';
 import { v4 as uuidv4 } from 'uuid';
 import { useImmerReducer } from 'use-immer';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEdit, faFileImport, faFileExport, faStream, faClone, faCheck, faTimes, faUndo, faVolumeDown, faVolumeUp } from '@fortawesome/free-solid-svg-icons'
+import { faEdit, faFileImport, faFileExport, faStream, faClone, faCheck, faTimes, faUndo, faVolumeDown, faVolumeUp, faRandom } from '@fortawesome/free-solid-svg-icons'
 import { faYoutube } from '@fortawesome/free-brands-svg-icons';
 
 
@@ -119,6 +119,7 @@ function uiReducer(draft, action) {
             draft.fields.media = '';
             draft.fields.label = '';
             draft.fields.loop = true;
+            draft.fields.shuffle = false;
             draft.fields.volume = [50];
 
             return;
@@ -129,6 +130,7 @@ function uiReducer(draft, action) {
             draft.fields.label = action.payload.label;
             draft.fields.volume = action.payload.volume ? [action.payload.volume] : [50];
             draft.fields.loop = action.payload.loop;
+            draft.fields.shuffle = action.payload.shuffle;
             draft.isEditing = action.payload.id;
 
             return;
@@ -159,6 +161,7 @@ function uiReducer(draft, action) {
                         'media'   : action.payload.media,
                         'playlist': action.payload.media.includes('list=') ? true: false,
                         'loop'    : action.payload.loop,
+                        'shuffle' : action.payload.shuffle,
                         'volume'  : action.payload.volume
                     };
 
@@ -173,6 +176,7 @@ function uiReducer(draft, action) {
                     media: action.payload.media,
                     playlist: action.payload.media.includes('list=') ? true : false,
                     loop: action.payload.loop,
+                    shuffle: action.payload.shuffle,
                     volume: action.payload.volume,
                 });
             }
@@ -183,6 +187,7 @@ function uiReducer(draft, action) {
             draft.fields.label = '';
             draft.fields.loop = true;
             draft.fields.volume = [50];
+            draft.fields.shuffle = false;
             draft.isDrawerOpen = false;
             draft.isEditing = false;
 
@@ -239,6 +244,7 @@ const initialState = {
         media: '',
         label: '',
         loop: true,
+        shuffle: false,
     }
 }
 
@@ -372,6 +378,10 @@ export default function Media(props) {
                                         }
                                         {mediaItem.loop 
                                             ? <Tag closeable={false}><FontAwesomeIcon icon={faUndo} size="xs" /> Loop</Tag> 
+                                            : ''
+                                        }
+                                        {mediaItem.shuffle 
+                                            ? <Tag closeable={false}><FontAwesomeIcon icon={faRandom} size="xs" /> Shuffle</Tag> 
                                             : ''
                                         }
                                         {(mediaItem.volume && mediaItem.volume !== 50) 
@@ -536,6 +546,21 @@ export default function Media(props) {
                             </Checkbox>
                         </FormControl>
 
+                        <FormControl label="Shuffle" caption="If the track is a playlist, the order will be randomized.">
+                            <Checkbox
+                                checked={fields.shuffle}
+                                checkmarkType={STYLE_TYPE.toggle_round}
+                                labelPlacement={LABEL_PLACEMENT.right}
+                                onChange={(e) => dispatch({
+                                    type: 'updateField',
+                                    fieldName: 'shuffle',
+                                    payload: e.currentTarget.checked
+                                })}
+                            >
+                                Enable shuffle
+                            </Checkbox>
+                        </FormControl>
+
                         <Button
                             onClick={(e) => {
                                 e.preventDefault();
@@ -547,6 +572,7 @@ export default function Media(props) {
                                         media: fields.media,
                                         label: fields.label,
                                         volume: fields.volume[0],
+                                        shuffle: fields.shuffle,
                                         loop: fields.loop
                                     }
                                 });

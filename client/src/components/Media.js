@@ -86,7 +86,7 @@ function uiReducer(draft, action) {
             return;
         }
         case 'updateField': {
-            draft.fields[action.fieldName] = action.payload;
+            draft.fields[action.fieldName].value = action.payload;
             return;
         }
         case 'updateList': {
@@ -116,21 +116,23 @@ function uiReducer(draft, action) {
         }
         case 'addMedia': {
             draft.isDrawerOpen = true;
-            draft.fields.media = '';
-            draft.fields.label = '';
-            draft.fields.loop = true;
-            draft.fields.shuffle = false;
-            draft.fields.volume = [50];
+            draft.fields.media.value = draft.fields.media.default;
+            draft.fields.label.value = draft.fields.label.default;
+            draft.fields.loop.value = draft.fields.loop.default;
+            draft.fields.shuffle.value = draft.fields.shuffle.default;
+            draft.fields.volume.value = draft.fields.volume.default;
+            draft.errors = {};
 
             return;
         }
         case 'editMedia': {
             draft.isDrawerOpen = true;
-            draft.fields.media = action.payload.media;
-            draft.fields.label = action.payload.label;
-            draft.fields.volume = action.payload.volume ? [action.payload.volume] : [50];
-            draft.fields.loop = action.payload.loop;
-            draft.fields.shuffle = action.payload.shuffle;
+            draft.fields.media.value = action.payload.media;
+            draft.fields.label.value = action.payload.label;
+            draft.fields.volume.value = action.payload.volume ? [action.payload.volume] : [50];
+            draft.fields.loop.value = action.payload.loop;
+            draft.fields.shuffle.value = action.payload.shuffle;
+            draft.errors = {};
             draft.isEditing = action.payload.id;
 
             return;
@@ -143,10 +145,45 @@ function uiReducer(draft, action) {
         }
         case 'saveMedia': {
 
+            let errors = {};
+
             /**
              * Validate fields
              */
+            for (let field in action.payload.fields) {
+                
+                if (!draft.fields[field].rules) {
+                    continue;
+                }
 
+                for (const rule in draft.fields[field].rules) {
+
+                    if (rule === 'min' && action.payload.fields[field].length < draft.fields[field].rules[rule]) {
+                        errors[field] = Array.isArray(draft.errors[field]) ? draft.errors[field] : [];
+                        errors[field].push('Please give a value');
+                    }
+
+                    if (rule === 'max' && action.payload.fields[field].length > draft.fields[field].rules[rule]) {
+                        errors[field] = Array.isArray(draft.errors[field]) ? draft.errors[field] : [];
+                        errors[field].push('Please shorten this value');
+                    }
+
+                    if (rule === 'match' && ! action.payload.fields[field].match(draft.fields[field].rules['match'])) {
+                        errors[field] = Array.isArray(draft.errors[field]) ? draft.errors[field] : [];
+                        errors[field].push('Unexpected value');
+                    }
+                }
+
+            }
+
+            if (Object.keys(errors).length) {
+                draft.errors = errors;
+                return;
+            }
+
+            /**
+             * Else let's save the values
+             */
             if (action.payload.id) {
 
                 draft.mediaList = draft.mediaList.map((mediaItem, index) => {
@@ -157,39 +194,39 @@ function uiReducer(draft, action) {
 
                     return {
                         'id'      : mediaItem.id,
-                        'label'   : action.payload.label,
-                        'media'   : action.payload.media,
-                        'playlist': action.payload.media.includes('list=') ? true: false,
-                        'loop'    : action.payload.loop,
-                        'shuffle' : action.payload.shuffle,
-                        'volume'  : action.payload.volume
+                        'label'   : action.payload.fields.label,
+                        'media'   : action.payload.fields.media,
+                        'playlist': action.payload.fields.media.includes('list=') ? true: false,
+                        'loop'    : action.payload.fields.loop,
+                        'shuffle' : action.payload.fields.shuffle,
+                        'volume'  : action.payload.fields.volume
                     };
 
                 });
 
-                console.log(draft.mediaList);
 
             } else {
                 draft.mediaList.push({
                     id: uuidv4(),
-                    label: action.payload.label,
-                    media: action.payload.media,
-                    playlist: action.payload.media.includes('list=') ? true : false,
-                    loop: action.payload.loop,
-                    shuffle: action.payload.shuffle,
-                    volume: action.payload.volume,
+                    label: action.payload.fields.label,
+                    media: action.payload.fields.media,
+                    playlist: action.payload.fields.media.includes('list=') ? true : false,
+                    loop: action.payload.fields.loop,
+                    shuffle: action.payload.fields.shuffle,
+                    volume: action.payload.fields.volume,
                 });
             }
 
             localStorage.setItem('tablebop-media', JSON.stringify(draft.mediaList));
 
-            draft.fields.media = '';
-            draft.fields.label = '';
-            draft.fields.loop = true;
-            draft.fields.volume = [50];
-            draft.fields.shuffle = false;
+            draft.fields.media.value = draft.fields.media.default;
+            draft.fields.label.value = draft.fields.label.default;
+            draft.fields.loop.value = draft.fields.loop.default;
+            draft.fields.shuffle.value = draft.fields.shuffle.default;
+            draft.fields.volume.value = draft.fields.volume.default;
             draft.isDrawerOpen = false;
             draft.isEditing = false;
+            draft.errors = {};
 
             return;
         }
@@ -240,12 +277,45 @@ const initialState = {
     activeTrack: false,
     playerState: false,
     fields: {
-        volume: [50],
-        media: '',
-        label: '',
-        loop: true,
-        shuffle: false,
-    }
+        volume: {
+            default: [50],
+            value: '',
+            rules: {}
+        },
+        media: {
+            default: '',
+            value: '',
+            rules: {
+                'match': new RegExp('^(http(s)?:\/\/)?((w){3}.)?youtu(be|.be)?(\.com)?\/.+')
+            }
+        },
+        label: {
+            default: '',
+            value: '',
+            rules: {
+                'min': 1,
+                'max': 25
+            }
+        },
+        loop: {
+            default: true,
+            value: '',
+            rules: {}
+        },
+        shuffle: {
+            default: false,
+            value: '',
+            rules: {}
+        },
+    },
+    // fields: {
+    //     volume: [50],
+    //     media: '',
+    //     label: '',
+    //     loop: true,
+    //     shuffle: false,
+    // },
+    errors: {}
 }
 
 /**
@@ -275,7 +345,8 @@ export default function Media(props) {
         isDrawerOpen,
         isEditing,
         fields,
-        playerState
+        playerState,
+        errors
     } = state; 
 
     const [css] = useStyletron();
@@ -299,6 +370,8 @@ export default function Media(props) {
         }
 
     }, [isActive, player, dispatch]);
+
+    console.log(errors);
 
     return (
         <UIDispatchContext.Provider value={dispatch}>
@@ -426,7 +499,6 @@ export default function Media(props) {
 
                     <StyledLink 
                         onClick={() => setIsImportModalOpen(true)} 
-                        startEnhancer={() => <FontAwesomeIcon icon={faFileImport} />}
                         className={css({
                             display: 'inlineBlock',
                             marginRight: '0.5em',
@@ -438,7 +510,6 @@ export default function Media(props) {
 
                     <StyledLink 
                         onClick={() => exportJSON(mediaList)} 
-                        startEnhancer={() => <FontAwesomeIcon icon={faFileExport} />}
                         className={css({
                             display: 'inlineBlock',
                             marginRight: '0.5em',
@@ -491,10 +562,11 @@ export default function Media(props) {
 
                     <form>
 
-                        <FormControl label="Label" caption="Give your track a name">
+                        <FormControl label="Label" caption="Give your track a name" error={errors.label ? 'Please give your track a name between 1 and 25 characters long' : false}>
                             <Input
                                 id="label"
-                                value={fields.label}
+                                value={fields.label.value}
+                                error={errors.label ? true : false}
                                 onChange={(e) => dispatch({ 
                                     type: 'updateField',
                                     fieldName: 'label',
@@ -503,10 +575,11 @@ export default function Media(props) {
                             />
                         </FormControl>
 
-                        <FormControl label="YouTube URL" caption="This can be an individual video or a playlist">
+                        <FormControl label="YouTube URL" caption="This can be an individual video or a playlist" error={errors.media ? 'Please enter a valuable YouTube URL' : false}>
                             <Input
                                 id="media"
-                                value={fields.media}
+                                value={fields.media.value}
+                                error={errors.media ? true : false}
                                 onChange={(e) => dispatch({ 
                                     type: 'updateField',
                                     fieldName: 'media',
@@ -518,7 +591,7 @@ export default function Media(props) {
                         <FormControl label="Volume" caption="Set the launch volume or leave it at the default (50%)">
                             <Slider
                                 id="volume"
-                                value={fields.volume}
+                                value={fields.volume.value}
                                 min={0}
                                 max={100}
                                 step={10}
@@ -533,7 +606,7 @@ export default function Media(props) {
 
                         <FormControl label="Loop" caption="If track is a playlist, this will loop the playlist. Otherwise, it will loop the single video.">
                             <Checkbox
-                                checked={fields.loop}
+                                checked={fields.loop.value}
                                 checkmarkType={STYLE_TYPE.toggle_round}
                                 labelPlacement={LABEL_PLACEMENT.right}
                                 onChange={(e) => dispatch({
@@ -548,7 +621,7 @@ export default function Media(props) {
 
                         <FormControl label="Shuffle" caption="If the track is a playlist, the order will be randomized.">
                             <Checkbox
-                                checked={fields.shuffle}
+                                checked={fields.shuffle.value}
                                 checkmarkType={STYLE_TYPE.toggle_round}
                                 labelPlacement={LABEL_PLACEMENT.right}
                                 onChange={(e) => dispatch({
@@ -569,11 +642,13 @@ export default function Media(props) {
                                     type: 'saveMedia',
                                     payload: {
                                         id: isEditing ? isEditing : '',
-                                        media: fields.media,
-                                        label: fields.label,
-                                        volume: fields.volume[0],
-                                        shuffle: fields.shuffle,
-                                        loop: fields.loop
+                                        fields: {
+                                            media: fields.media.value,
+                                            label: fields.label.value,
+                                            volume: fields.volume.value[0],
+                                            shuffle: fields.shuffle.value,
+                                            loop: fields.loop.value
+                                        }
                                     }
                                 });
                             }}

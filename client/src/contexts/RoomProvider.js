@@ -61,8 +61,6 @@ export function RoomProvider({ id, children }) {
             trackId = media.media.match('youtu(?:.*\/v\/|.*v\=|\.be\/)([A-Za-z0-9_\-]{11})')[1];
         }
 
-        console.log(player.current);
-
         const iframe = player.current.getInternalPlayer();
 
         let initialVolume = await iframe.getVolume();
